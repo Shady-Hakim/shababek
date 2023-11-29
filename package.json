@@ -1,0 +1,26 @@
+{
+  "name": "shababeek",
+  "version": "1.0.0",
+  "engines": {
+    "node": "^18.18.2"
+  },
+  "description": "Cafe Point of sale",
+  "scripts": {
+    "install:clean": "rm -rf yarn.lock node_modules && yarn && cd server && yarn install:clean && cd ../client && yarn install:clean",
+    "start:dev": "concurrently \"cd server && yarn start:dev\" \"cd client && yarn start:dev\"",
+    "start:test": "cd server && yarn test",
+    "heroku-postbuild": "cd server && yarn install:clean && cd ../client && yarn install:clean && yarn start:prod",
+    "start": "cd server && yarn start:prod"
+  },
+  "devDependencies": {
+    "concurrently": "^6.0.0"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "@mui/base": "^5.0.0-beta.24",
+    "@mui/icons-material": "^5.14.18",
+    "@mui/joy": "^5.0.0-beta.15",
+    "@mui/material": "^5.14.18"
+  }
+}
