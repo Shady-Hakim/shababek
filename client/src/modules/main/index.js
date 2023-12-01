@@ -12,8 +12,9 @@ import {
   createTheme,
   ThemeProvider,
 } from '@mui/material';
-import { Navbar, Order, TopBar } from '../common/components';
+import { Navbar, TopBar } from '../common/components';
 import { Router } from '../router';
+import Order from '../common/order';
 
 function Copyright(props) {
   return (
@@ -56,7 +57,7 @@ export default function Dashboard() {
           <Toolbar />
           <Container maxWidth='lg' sx={{ mt: 4, mb: 4, backgroundColor: '#fff' }}>
             <Grid container spacing={3}>
-              <Grid item xs={12} md={8} lg={9}>
+              <Grid item xs={12} md={8} lg={8}>
                 <Paper
                   sx={{
                     p: 2,
@@ -64,7 +65,7 @@ export default function Dashboard() {
                   <RouterProvider router={Router} />
                 </Paper>
               </Grid>
-              <Grid item xs={12} md={4} lg={3}>
+              <Grid item xs={12} md={4} lg={4}>
                 <Order />
               </Grid>
             </Grid>
