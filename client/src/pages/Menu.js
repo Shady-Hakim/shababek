@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import Grid from '@mui/material/Unstable_Grid2';
 import { Typography } from '@mui/material';
 import CategoriesBar from '../modules/common/components/categoriesBar';
@@ -41,6 +42,10 @@ const products = [
 ];
 const Menu = () => {
   let { tableNumber } = useParams();
+  const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(addTable(tableNumber));
+  }, [dispatch, tableNumber]);
 
   return (
     <Grid container spacing={3}>
