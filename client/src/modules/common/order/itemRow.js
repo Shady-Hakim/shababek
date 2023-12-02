@@ -1,7 +1,8 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
 import { TableCell, TableRow, TextField } from '@mui/material';
-import { changeQty } from '../cart';
+import { changeQty, removeItem } from '../cart';
+import { Button } from '@mui/base';
 
 function ItemRow({ row }) {
   const dispatch = useDispatch();
@@ -14,6 +15,7 @@ function ItemRow({ row }) {
       <TableCell>{row.name}</TableCell>
       <TableCell align='right'>
         <TextField
+          error={row.qty < 1}
           value={row.qty}
           id='outlined-number'
           type='number'
@@ -25,8 +27,10 @@ function ItemRow({ row }) {
           onChange={handleQtyChange}
         />
       </TableCell>
-      <TableCell align='right'>{row.price * row.qty}</TableCell>
-      <TableCell align='right'>X</TableCell>
+      <TableCell align='right'>{row.price * row.qty} LE</TableCell>
+      <TableCell align='right'>
+        <Button onClick={() => dispatch(removeItem(row.id))}>x</Button>
+      </TableCell>
     </TableRow>
   );
 }
