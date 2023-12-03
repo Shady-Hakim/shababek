@@ -1,20 +1,8 @@
 import * as React from 'react';
 import { RouterProvider } from 'react-router-dom';
-import {
-  Link,
-  CssBaseline,
-  Box,
-  Toolbar,
-  Typography,
-  Container,
-  Grid,
-  Paper,
-  createTheme,
-  ThemeProvider,
-} from '@mui/material';
+import { Link, CssBaseline, Box, Toolbar, Typography, Container, createTheme, ThemeProvider } from '@mui/material';
 import { Navbar, TopBar } from '../common/components';
-import { Router } from '../router';
-import Order from '../common/order';
+import { NonLoggedInRouter, Router } from '../router';
 
 function Copyright(props) {
   return (
@@ -40,39 +28,31 @@ export default function Dashboard() {
 
   return (
     <ThemeProvider theme={defaultTheme}>
-      <Box sx={{ display: 'flex' }}>
-        <CssBaseline />
-        <TopBar toggleDrawer={() => toggleDrawer()} open={open} />
-        <Navbar toggleDrawer={() => toggleDrawer()} open={open} />
+      {false ? (
+        <RouterProvider router={NonLoggedInRouter} />
+      ) : (
+        <Box sx={{ display: 'flex' }}>
+          <CssBaseline />
+          <TopBar toggleDrawer={() => toggleDrawer()} open={open} />
+          <Navbar toggleDrawer={() => toggleDrawer()} open={open} />
 
-        <Box
-          component='main'
-          sx={{
-            backgroundColor: (theme) =>
-              theme.palette.mode === 'light' ? theme.palette.grey[100] : theme.palette.grey[900],
-            flexGrow: 1,
-            height: '100vh',
-            overflow: 'auto',
-          }}>
-          <Toolbar />
-          <Container maxWidth='lg' sx={{ mt: 4, mb: 4, backgroundColor: '#fff' }}>
-            <Grid container spacing={3}>
-              <Grid item xs={12} md={8} lg={8}>
-                <Paper
-                  sx={{
-                    p: 2,
-                  }}>
-                  <RouterProvider router={Router} />
-                </Paper>
-              </Grid>
-              <Grid item xs={12} md={4} lg={4}>
-                <Order />
-              </Grid>
-            </Grid>
-            <Copyright sx={{ pt: 4 }} />
-          </Container>
+          <Box
+            component='main'
+            sx={{
+              backgroundColor: (theme) =>
+                theme.palette.mode === 'light' ? theme.palette.grey[100] : theme.palette.grey[900],
+              flexGrow: 1,
+              height: '100vh',
+              overflow: 'auto',
+            }}>
+            <Toolbar />
+            <Container maxWidth='lg' sx={{ mt: 4, mb: 4, backgroundColor: '#fff' }}>
+              <RouterProvider router={Router} />
+              <Copyright sx={{ pt: 4 }} />
+            </Container>
+          </Box>
         </Box>
-      </Box>
+      )}
     </ThemeProvider>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -13,18 +13,41 @@ function ccyFormat(num) {
   return `${num.toFixed(2)}`;
 }
 
-function subtotal(items) {
+function handleSubtotal(items) {
   return items.map(({ price, qty }) => price * qty).reduce((sum, i) => sum + i, 0);
 }
 
-export default function Receipt() {
+export default function Receipt({ setCalculations }) {
   const cartItems = useSelector((state) => state.cart.cartItems);
-  const [taxRate, setTaxRate] = useState(0);
   const [discountRate, setDiscountRate] = useState(0);
-  console.log(taxRate);
-  const invoiceSubtotal = subtotal(cartItems);
-  const invoiceTaxes = (taxRate / 100) * invoiceSubtotal + invoiceSubtotal;
-  const invoiceTotal = invoiceTaxes - (discountRate / 100) * invoiceTaxes;
+  const taxRate = 0.14;
+  const serviceRate = 0.12;
+
+  const subtotal = handleSubtotal(cartItems);
+  const taxesAmount = taxRate * subtotal;
+  const serviceAmount = serviceRate * subtotal;
+  const totalWithTaxesAndService = taxesAmount + serviceAmount + subtotal;
+  const discountAmount = (discountRate / 100) * totalWithTaxesAndService;
+  const invoiceTotal = totalWithTaxesAndService - discountAmount;
+
+  useEffect(() => {
+    setCalculations({
+      rates: { taxRate, serviceRate, discountRate },
+      totals: { subtotal, totalWithTaxesAndService, invoiceTotal },
+      amounts: { taxesAmount, serviceAmount, discountAmount },
+    });
+  }, [
+    discountAmount,
+    discountRate,
+    invoiceTotal,
+    serviceAmount,
+    setCalculations,
+    subtotal,
+    taxRate,
+    taxesAmount,
+    totalWithTaxesAndService,
+  ]);
+
   return (
     <TableContainer>
       <Table>
@@ -41,35 +64,34 @@ export default function Receipt() {
             <ItemRow key={item.id} row={item} />
           ))}
           <TableRow>
-            <TableCell rowSpan={4} />
+            <TableCell rowSpan={5} />
             <TableCell colSpan={2}>Subtotal</TableCell>
-            <TableCell align='right'>{ccyFormat(invoiceSubtotal)}</TableCell>
+            <TableCell align='right'>{ccyFormat(subtotal)} LE</TableCell>
           </TableRow>
           <TableRow>
-            <TableCell>Tax %</TableCell>
+            <TableCell>Tax 14%</TableCell>
             <TableCell colSpan={2} align='right'>
-              <TextField
-                id='outlined-number'
-                type='number'
-                InputLabelProps={{
-                  shrink: true,
-                }}
-                InputProps={{ inputProps: { min: 1 } }}
-                size='small'
-                onChange={(event) => setTaxRate(event.target.value)}
-              />
+              {ccyFormat(taxesAmount)} LE
+            </TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell>Service 12%</TableCell>
+            <TableCell colSpan={2} align='right'>
+              {ccyFormat(serviceAmount)} LE
             </TableCell>
           </TableRow>
           <TableRow>
             <TableCell>Discount %</TableCell>
             <TableCell colSpan={2} align='right'>
               <TextField
+                error={discountRate < 0}
+                defaultValue={0}
                 id='outlined-number'
                 type='number'
                 InputLabelProps={{
                   shrink: true,
                 }}
-                InputProps={{ inputProps: { min: 1 } }}
+                InputProps={{ inputProps: { min: 0 } }}
                 size='small'
                 onChange={(event) => setDiscountRate(event.target.value)}
               />
@@ -78,7 +100,7 @@ export default function Receipt() {
           <TableRow>
             <TableCell>Total</TableCell>
             <TableCell colSpan={2} align='right'>
-              {ccyFormat(invoiceTotal)}
+              {ccyFormat(invoiceTotal)} LE
             </TableCell>
           </TableRow>
         </TableBody>

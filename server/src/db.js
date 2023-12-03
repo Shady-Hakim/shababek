@@ -5,7 +5,9 @@ const logger = require('./logger');
 
 module.exports.connect = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI);
+    mongoose.set('strictQuery', false);
+
+    mongoose.connect(process.env.MONGODB_URI);
 
     logger.info(`[${path.relative(process.cwd(), __filename)}] Database connected.`);
   } catch (error) {

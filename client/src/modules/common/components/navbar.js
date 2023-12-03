@@ -2,7 +2,7 @@ import * as React from 'react';
 import { styled } from '@mui/material/styles';
 import MuiDrawer from '@mui/material/Drawer';
 import { ListItemText, ListItemIcon, ListItemButton, IconButton, Divider, Toolbar, List } from '@mui/material';
-import { Settings, BarChart, ShoppingCart, People, ChevronLeft, TableRestaurant } from '@mui/icons-material';
+import { Settings, BarChart, ShoppingCart, ChevronLeft, TableRestaurant } from '@mui/icons-material';
 
 function Navbar({ toggleDrawer, open }) {
   const mainListItems = (
@@ -13,17 +13,11 @@ function Navbar({ toggleDrawer, open }) {
         </ListItemIcon>
         <ListItemText primary='Tables' />
       </ListItemButton>
-      <ListItemButton>
+      <ListItemButton href={'/orders'}>
         <ListItemIcon>
           <ShoppingCart />
         </ListItemIcon>
         <ListItemText primary='Orders' />
-      </ListItemButton>
-      <ListItemButton>
-        <ListItemIcon>
-          <People />
-        </ListItemIcon>
-        <ListItemText primary='Customers' />
       </ListItemButton>
       <ListItemButton>
         <ListItemIcon>

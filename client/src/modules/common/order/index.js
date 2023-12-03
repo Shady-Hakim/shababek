@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Divider, Grid, Paper, TextField, Typography, Button } from '@mui/material';
 import { People, TableRestaurant } from '@mui/icons-material';
@@ -7,7 +7,10 @@ import Receipt from './receipt';
 function Order() {
   const tableNumber = useSelector((state) => state.table.number);
   const cartItems = useSelector((state) => state.cart.cartItems);
+  const [calculations, setCalculations] = useState();
+  const [guests, setGuests] = useState();
 
+  const order = { guests, cartItems, tableNumber: tableNumber, ...calculations };
   return (
     <Paper
       sx={{
@@ -35,6 +38,7 @@ function Order() {
           Guests
         </Typography>
         <TextField
+          error={guests < 1}
           id='outlined-number'
           type='number'
           InputLabelProps={{
@@ -42,14 +46,15 @@ function Order() {
           }}
           InputProps={{ inputProps: { min: 1 } }}
           size='small'
+          onChange={(event) => setGuests(+event.target.value)}
         />
       </Grid>
       <Divider />
       {!!cartItems.length && (
         <>
-          <Receipt />
+          <Receipt setCalculations={setCalculations} />
           <Divider />
-          <Button variant='contained' sx={{ mr: 2, mt: 2 }} fullWidth>
+          <Button onClick={() => console.log({ order })} variant='contained' sx={{ mr: 2, mt: 2 }} fullWidth>
             Save
           </Button>
         </>

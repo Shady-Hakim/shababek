@@ -6,6 +6,7 @@ import { Typography } from '@mui/material';
 import CategoriesBar from '../modules/common/components/categoriesBar';
 import ProductItem from '../modules/common/components/productItem';
 import { addTable } from '../modules/common/table';
+import Order from '../modules/common/order';
 
 const products = [
   {
@@ -47,18 +48,23 @@ const Menu = () => {
   }, [dispatch, tableNumber]);
 
   return (
-    <>
-      <Typography sx={{ textAlign: 'center', fontWeight: 'bold', fontSize: 30, marginBottom: 5 }}>
-        Table #{tableNumber}
-      </Typography>
-      <CategoriesBar />
+    <Grid container spacing={3}>
+      <Grid item xs={12} md={8} lg={8}>
+        <Typography sx={{ textAlign: 'center', fontWeight: 'bold', fontSize: 30, marginBottom: 5 }}>
+          Table #{tableNumber}
+        </Typography>
+        <CategoriesBar />
 
-      <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 1, sm: 8, md: 12 }}>
-        {products.map((product) => (
-          <ProductItem key={product.id} product={product} />
-        ))}
+        <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 1, sm: 8, md: 12 }}>
+          {products.map((product) => (
+            <ProductItem key={product.id} product={product} />
+          ))}
+        </Grid>
       </Grid>
-    </>
+      <Grid item xs={12} md={4} lg={4}>
+        <Order />
+      </Grid>
+    </Grid>
   );
 };
 

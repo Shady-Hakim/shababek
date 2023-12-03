@@ -6,7 +6,7 @@ const initialState = {
 
 const {
   reducer,
-  actions: { addToCart, changeQty },
+  actions: { addToCart, changeQty, removeItem },
 } = createSlice({
   name: 'cart',
   initialState,
@@ -25,9 +25,12 @@ const {
         product.id === payload.id ? { ...product, qty: payload.qty } : product
       );
     },
+    removeItem: (state, { payload }) => {
+      state.cartItems = state.cartItems.filter((item) => item.id !== payload);
+    },
   },
 });
 
-export { addToCart, changeQty };
+export { addToCart, changeQty, removeItem };
 
 export default reducer;
