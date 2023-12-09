@@ -42,7 +42,7 @@ const populate = [];
  *               properties:
  *                 name:
  *                   type: string
- *                   example: TicketEgypt
+ *                   example: Table 1
  *               required:
  *                 - name
  *       responses:
@@ -61,8 +61,17 @@ const populate = [];
  */
 router.post('/', auth(['admin']), async (req, res) => {
   try {
+    let table;
+
     switch (req.admin.role) {
+      case 'Super Admin':
+        table = new Table({ ...req.body, company: req.body.company ? req.body.company : req.admin.company });
+        break;
+
       case 'Admin':
+        table = new Table({ ...req.body, company: req.admin.company });
+        break;
+
       case 'Cashier': {
         const error = new Error();
 
@@ -75,8 +84,6 @@ router.post('/', auth(['admin']), async (req, res) => {
       default:
         break;
     }
-
-    const table = new Table(req.body);
 
     await table.save();
 
@@ -146,6 +153,26 @@ router.get('/', auth(['admin']), async (req, res) => {
     const match = {};
 
     let fields;
+
+    switch (req.admin.role) {
+      case 'Super Admin':
+        if (req.query.company) {
+          match.company = req.query.company;
+        }
+        break;
+
+      case 'Admin':
+      case 'Cashier':
+        match.company = req.admin.company;
+        break;
+
+      default:
+        break;
+    }
+
+    if (req.query.isActive) {
+      match.isActive = { true: true, false: false }[req.query.isActive];
+    }
 
     if (req.query.fields) {
       fields = req.query.fields.replace(/,/g, ' ');
@@ -242,9 +269,23 @@ router.get('/:id', auth(['admin']), async (req, res) => {
       throw error;
     }
 
-    const match = {
-      _id: req.params.id,
-    };
+    const match = { _id: req.params.id };
+
+    switch (req.admin.role) {
+      case 'Super Admin':
+        if (req.query.company) {
+          match.company = req.query.company;
+        }
+        break;
+
+      case 'Cashier':
+      case 'Admin':
+        match.company = req.admin.company;
+        break;
+
+      default:
+        break;
+    }
 
     let fields;
 
@@ -297,7 +338,7 @@ router.get('/:id', auth(['admin']), async (req, res) => {
  *               properties:
  *                 name:
  *                   type: string
- *                   example: TicketEgypt
+ *                   example: Table 1
  *       responses:
  *         200:
  *           description: Table updated successfully.
@@ -342,8 +383,13 @@ router.patch('/:id', auth(['admin']), async (req, res) => {
       throw error;
     }
 
+    const match = { _id: req.params.id };
+
     switch (req.admin.role) {
       case 'Admin':
+        match.company = req.admin.company;
+        break;
+
       case 'Cashier':
         error.name = 'AuthorizationError';
         error.message = "You aren't authorized to perform this action.";
@@ -353,10 +399,6 @@ router.patch('/:id', auth(['admin']), async (req, res) => {
       default:
         break;
     }
-
-    const match = {
-      _id: req.params.id,
-    };
 
     const table = await Table.findOne(match);
 
@@ -424,8 +466,13 @@ router.delete('/:id', auth(['admin']), async (req, res) => {
       throw error;
     }
 
+    const match = { _id: req.params.id };
+
     switch (req.admin.role) {
       case 'Admin':
+        match.company = req.admin.company;
+        break;
+
       case 'Cashier':
         error.name = 'AuthorizationError';
         error.message = "You aren't authorized to perform this action.";
@@ -435,10 +482,6 @@ router.delete('/:id', auth(['admin']), async (req, res) => {
       default:
         break;
     }
-
-    const match = {
-      _id: req.params.id,
-    };
 
     const table = await Table.findOne(match);
 

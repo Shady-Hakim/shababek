@@ -19,6 +19,15 @@ const mongoose = require('mongoose');
  *         category:
  *           type: string
  *           example: e05x40a8161m495p500l684e
+ *         service:
+ *           type: string
+ *           example: 12
+ *         taxes:
+ *           type: string
+ *           example: 14
+ *         discount:
+ *           type: string
+ *           example: 10
  *         status:
  *           type: string
  *           enum:
@@ -70,14 +79,19 @@ const mongoose = require('mongoose');
  *           example: 0
  *       required:
  *         - _id
+ *         - company
  *         - admin
  *         - table
- *         - category
  *         - status
  *         - products
  */
 const OrderSchema = new mongoose.Schema(
   {
+    company: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Company',
+      required: [true, 'A company ID must be attached to the order.'],
+    },
     admin: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Admin',
@@ -88,11 +102,6 @@ const OrderSchema = new mongoose.Schema(
       ref: 'Table',
       required: [true, 'A table ID must be attached to the order.'],
     },
-    category: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Category',
-      required: [true, 'A category ID must be attached to the order.'],
-    },
     status: {
       type: String,
       required: [true, 'You must choose a status.'],
@@ -100,6 +109,7 @@ const OrderSchema = new mongoose.Schema(
         values: ['Ordered', 'Paid', 'Cancelled', 'Refunded'],
         message: "The status you've chosen is invalid.",
       },
+      default: 'Ordered',
     },
     paymentType: {
       type: String,
@@ -108,11 +118,15 @@ const OrderSchema = new mongoose.Schema(
         message: "The payment type you've chosen is invalid.",
       },
     },
+    service: String,
+    taxes: String,
+    discount: String,
     products: {
       type: [
         {
           product: {
             type: mongoose.Schema.Types.ObjectId,
+            ref: 'Product',
             required: [true, "A product ID must be attached to the order's products."],
           },
           price: {
@@ -135,7 +149,7 @@ const OrderSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 const Order = mongoose.model('Order', OrderSchema);

@@ -9,12 +9,8 @@ const errorHandler = require('../../errorHandler');
 const router = express.Router();
 
 const populate = [
-  {
-    path: 'category',
-    options: {
-      select: 'name',
-    },
-  },
+  { path: 'company', options: { select: 'name' } },
+  { path: 'category', options: { select: 'name' } },
 ];
 
 /**
@@ -73,9 +69,6 @@ const populate = [
  *                 - name
  *                 - description
  *                 - price
- *                 - imageUrl
- *                 - minimumOrdered
- *                 - maximumOrdered
  *                 - isActive
  *       responses:
  *         201:
@@ -93,8 +86,17 @@ const populate = [
  */
 router.post('/', auth(['admin']), async (req, res) => {
   try {
+    let product;
+
     switch (req.admin.role) {
+      case 'Super Admin':
+        product = new Product({ ...req.body, company: req.body.company ? req.body.company : req.admin.company });
+        break;
+
       case 'Admin':
+        product = new Product({ ...req.body, company: req.admin.company });
+        break;
+
       case 'Cashier': {
         const error = new Error();
 
@@ -107,8 +109,6 @@ router.post('/', auth(['admin']), async (req, res) => {
       default:
         break;
     }
-
-    const product = new Product(req.body);
 
     await product.save();
 
@@ -179,15 +179,28 @@ router.get('/', auth(['admin']), async (req, res) => {
 
     let fields;
 
+    switch (req.admin.role) {
+      case 'Super Admin':
+        if (req.query.company) {
+          match.company = req.query.company;
+        }
+        break;
+
+      case 'Admin':
+      case 'Cashier':
+        match.company = req.admin.company;
+        break;
+
+      default:
+        break;
+    }
+
     if (req.query.category) {
       match.category = req.query.category;
     }
 
     if (req.query.isActive) {
-      match.isActive = {
-        true: true,
-        false: false,
-      }[req.query.isActive];
+      match.isActive = { true: true, false: false }[req.query.isActive];
     }
 
     if (req.query.fields) {
@@ -285,9 +298,23 @@ router.get('/:id', auth(['admin']), async (req, res) => {
       throw error;
     }
 
-    const match = {
-      _id: req.params.id,
-    };
+    const match = { _id: req.params.id };
+
+    switch (req.admin.role) {
+      case 'Super Admin':
+        if (req.query.company) {
+          match.company = req.query.company;
+        }
+        break;
+
+      case 'Cashier':
+      case 'Admin':
+        match.company = req.admin.company;
+        break;
+
+      default:
+        break;
+    }
 
     let fields;
 
@@ -347,15 +374,6 @@ router.get('/:id', auth(['admin']), async (req, res) => {
  *                 price:
  *                   type: string
  *                   example: '6'
- *                 imageUrl:
- *                   type: string
- *                   example: http://localhost:5001/.../pepsi.jpg
- *                 minimumOrdered:
- *                   type: number
- *                   example: 1
- *                 maximumOrdered:
- *                   type: number
- *                   example: 12
  *                 isActive:
  *                   type: string
  *                   example: true
@@ -388,7 +406,7 @@ router.patch('/:id', auth(['admin']), async (req, res) => {
     }
 
     const updatesKeys = Object.keys(req.body);
-    const allowedUpdatesKeys = ['description', 'price', 'imageUrl', 'minimumOrdered', 'maximumOrdered', 'isActive'];
+    const allowedUpdatesKeys = ['name', 'description', 'price', 'isActive'];
     const isValidOperation = updatesKeys.every((updatesKey) => allowedUpdatesKeys.includes(updatesKey));
 
     if (!isValidOperation) {
@@ -404,8 +422,13 @@ router.patch('/:id', auth(['admin']), async (req, res) => {
       throw error;
     }
 
+    const match = { _id: req.params.id };
+
     switch (req.admin.role) {
       case 'Admin':
+        match.company = req.admin.company;
+        break;
+
       case 'Cashier':
         error.name = 'AuthorizationError';
         error.message = "You aren't authorized to perform this action.";
@@ -415,10 +438,6 @@ router.patch('/:id', auth(['admin']), async (req, res) => {
       default:
         break;
     }
-
-    const match = {
-      _id: req.params.id,
-    };
 
     const product = await Product.findOne(match);
 
@@ -486,8 +505,13 @@ router.delete('/:id', auth(['admin']), async (req, res) => {
       throw error;
     }
 
+    const match = { _id: req.params.id };
+
     switch (req.admin.role) {
       case 'Admin':
+        match.company = req.admin.company;
+        break;
+
       case 'Cashier':
         error.name = 'AuthorizationError';
         error.message = "You aren't authorized to perform this action.";
@@ -497,10 +521,6 @@ router.delete('/:id', auth(['admin']), async (req, res) => {
       default:
         break;
     }
-
-    const match = {
-      _id: req.params.id,
-    };
 
     const product = await Product.findOneAndDelete(match);
 

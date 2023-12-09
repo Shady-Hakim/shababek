@@ -10,6 +10,9 @@ const mongoose = require('mongoose');
  *         _id:
  *           type: string
  *           example: e05x40a8161m495p500l684e
+ *         company:
+ *           type: string
+ *           example: e05x40a8161m495p500l684e
  *         name:
  *           type: string
  *           example: Cold Drinks
@@ -34,15 +37,20 @@ const mongoose = require('mongoose');
  *           example: 0
  *       required:
  *         - _id
+ *         - company
  *         - name
  *         - description
  *         - isActive
  */
 const CategorySchema = new mongoose.Schema(
   {
+    company: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Company',
+      required: [true, 'A company ID must be attached to the Category.'],
+    },
     name: {
       type: String,
-      unique: true,
       required: [true, "Name can't be blank."],
       trim: true,
     },
@@ -59,7 +67,7 @@ const CategorySchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 const Category = mongoose.model('Category', CategorySchema);

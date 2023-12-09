@@ -10,6 +10,9 @@ const mongoose = require('mongoose');
  *         _id:
  *           type: string
  *           example: e05x40a8161m495p500l684e
+ *         company:
+ *           type: string
+ *           example: e05x40a8161m495p500l684e
  *         category:
  *           type: string
  *           example: e05x40a8161m495p500l684e
@@ -25,12 +28,6 @@ const mongoose = require('mongoose');
  *         imageUrl:
  *           type: string
  *           example: http://localhost:5001/.../pepsi.jpg
- *         minimumOrdered:
- *           type: number
- *           example: 1
- *         maximumOrdered:
- *           type: number
- *           example: 12
  *         isActive:
  *           type: boolean
  *           default: true
@@ -49,16 +46,19 @@ const mongoose = require('mongoose');
  *           example: 0
  *       required:
  *         - _id
+ *         - category
  *         - name
  *         - description
  *         - price
- *         - imageUrl
- *         - minimumOrdered
- *         - maximumOrdered
  *         - isActive
  */
 const ProductSchema = new mongoose.Schema(
   {
+    company: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Company',
+      required: [true, 'A company ID must be attached to the Product.'],
+    },
     category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Category',
@@ -66,7 +66,6 @@ const ProductSchema = new mongoose.Schema(
     },
     name: {
       type: String,
-      unique: true,
       required: [true, "Name can't be blank."],
       trim: true,
     },
@@ -81,16 +80,6 @@ const ProductSchema = new mongoose.Schema(
       trim: true,
     },
     imageUrl: String,
-    minimumOrdered: {
-      type: Number,
-      required: [true, "Minimum ordered can't be blank."],
-      trim: true,
-    },
-    maximumOrdered: {
-      type: Number,
-      required: [true, "Maximum ordered can't be blank."],
-      trim: true,
-    },
     isActive: {
       type: Boolean,
       required: [true, "Active status can't be blank."],
@@ -99,7 +88,7 @@ const ProductSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 const Product = mongoose.model('Product', ProductSchema);

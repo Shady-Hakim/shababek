@@ -2,34 +2,29 @@ const express = require('express');
 const mongoose = require('mongoose');
 const _ = require('lodash');
 
-const Order = require('../../models/Order');
+const Company = require('../../models/Company');
 const auth = require('../../middleware/auth');
 const errorHandler = require('../../errorHandler');
 
 const router = express.Router();
 
-const populate = [
-  { path: 'company', options: { select: 'name' } },
-  { path: 'admin', options: { select: 'firstName lastName' } },
-  { path: 'table', options: { select: 'name' } },
-  { path: 'products.product', options: { select: 'name price' } },
-];
+const populate = [];
 
 /**
  * @swagger
  * tags:
- *   name: orders
+ *   name: companies
  */
 
 /**
  * @swagger
  * paths:
- *   /orders:
+ *   /companies:
  *     post:
  *       tags:
- *         - orders
+ *         - companies
  *       operationId: create
- *       summary: Creates a new order.
+ *       summary: Creates a new company.
  *       security:
  *         - bearerAuth: []
  *       parameters:
@@ -45,71 +40,18 @@ const populate = [
  *             schema:
  *               type: object
  *               properties:
- *                 admin:
+ *                 name:
  *                   type: string
- *                   example: e05x40a8161m495p500l684e
- *                 table:
- *                   type: string
- *                   example: e05x40a8161m495p500l684e
- *                 category:
- *                   type: string
- *                   example: e05x40a8161m495p500l684e
- *                 service:
- *                   type: string
- *                   example: 10
- *                 taxes:
- *                   type: string
- *                   example: 14
- *                 discount:
- *                   type: string
- *                   example: 14
- *                 status:
- *                   type: string
- *                   enum:
- *                     - Ordered
- *                     - Paid
- *                     - Cancelled
- *                     - Refunded
- *                   example: Paid
- *                 paymentType:
- *                   type: string
- *                   enum:
- *                     - Mixed
- *                     - Cash
- *                     - Card
- *                   example: Cash
- *                 products:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       product:
- *                         type: string
- *                         example: e05x40a8161m495p500l684e
- *                       price:
- *                         type: string
- *                         example: '100'
- *                       count:
- *                         type: number
- *                         example: 3
- *                     required:
- *                       - product
- *                       - price
- *                       - count
- *                   minItems: 1
+ *                   example: Shababek
  *               required:
- *                 - _id
- *                 - admin
- *                 - category
- *                 - status
- *                 - products
+ *                 - name
  *       responses:
  *         201:
- *           description: Order created successfully.
+ *           description: Company created successfully.
  *           content:
  *             application/json:
  *               schema:
- *                 $ref: '#/components/schemas/Order'
+ *                 $ref: '#/components/schemas/Company'
  *         400:
  *           $ref: '#/components/responses/ClientError'
  *         401:
@@ -119,31 +61,28 @@ const populate = [
  */
 router.post('/', auth(['admin']), async (req, res) => {
   try {
-    let order;
-
     switch (req.admin.role) {
-      case 'Super Admin':
-        order = new Order({
-          ...req.body,
-          company: req.body.company ? req.body.company : req.admin.company,
-          admin: req.admin._id,
-        });
-        break;
-
       case 'Admin':
-      case 'Cashier':
-        order = new Order({ ...req.body, company: req.admin.company, admin: req.admin._id });
-        break;
+      case 'Cashier': {
+        const error = new Error();
+
+        error.name = 'AuthorizationError';
+        error.message = "You aren't authorized to perform this action.";
+
+        throw error;
+      }
 
       default:
         break;
     }
 
-    await order.save();
+    const company = new Company(req.body);
 
-    await Order.populate(order, populate);
+    await company.save();
 
-    res.status(201).json(order);
+    await Company.populate(company, populate);
+
+    res.status(201).json(company);
   } catch (error) {
     const reformattedError = errorHandler.reformatAndLog(req.admin._id, error);
 
@@ -154,12 +93,12 @@ router.post('/', auth(['admin']), async (req, res) => {
 /**
  * @swagger
  * paths:
- *   /orders:
+ *   /companies:
  *     get:
  *       tags:
- *         - orders
+ *         - companies
  *       operationId: read
- *       summary: Reads list of orders.
+ *       summary: Reads list of companies.
  *       security:
  *        - bearerAuth: []
  *       parameters:
@@ -190,13 +129,13 @@ router.post('/', auth(['admin']), async (req, res) => {
  *           example: createdAt:asc
  *       responses:
  *         200:
- *           description: List of orders returned successfully.
+ *           description: List of companies returned successfully.
  *           content:
  *             application/json:
  *               schema:
  *                 type: array
  *                 items:
- *                   $ref: '#/components/schemas/Order'
+ *                   $ref: '#/components/schemas/Company'
  *         401:
  *           $ref: '#/components/responses/AuthorizationError'
  *         500:
@@ -206,38 +145,25 @@ router.get('/', auth(['admin']), async (req, res) => {
   try {
     const match = {};
 
-    let fields;
-
     switch (req.admin.role) {
-      case 'Super Admin':
-        if (req.query.company) {
-          match.company = req.query.company;
-        }
+      case 'Admin':
+        match._id = { $ne: req.admin.company };
         break;
 
-      case 'Admin':
-      case 'Cashier':
-        match.company = req.admin.company;
-        break;
+      case 'Cashier': {
+        const error = new Error();
+
+        error.name = 'AuthorizationError';
+        error.message = "You aren't authorized to perform this action.";
+
+        throw error;
+      }
 
       default:
         break;
     }
 
-    if (req.query.admin) {
-      match.admin = req.query.admin;
-    }
-
-    if (req.query.table) {
-      match.table = req.query.table;
-    }
-    if (req.query.status) {
-      match.status = req.query.status;
-    }
-
-    if (req.query.paymentType) {
-      match.paymentType = req.query.paymentType;
-    }
+    let fields;
 
     if (req.query.fields) {
       fields = req.query.fields.replace(/,/g, ' ');
@@ -266,14 +192,14 @@ router.get('/', auth(['admin']), async (req, res) => {
       sort.createdAt = -1;
     }
 
-    const orders = await Order.find(match)
+    const companies = await Company.find(match)
       .select(fields)
       .limit(Number(req.query.limit))
       .skip(Number(req.query.skip))
       .sort(sort)
       .populate(populate);
 
-    res.json(orders);
+    res.json(companies);
   } catch (error) {
     const reformattedError = errorHandler.reformatAndLog(req.admin._id, error);
 
@@ -284,12 +210,12 @@ router.get('/', auth(['admin']), async (req, res) => {
 /**
  * @swagger
  * paths:
- *   /orders/{id}:
+ *   /companies/{id}:
  *     get:
  *       tags:
- *         - orders
+ *         - companies
  *       operationId: readById
- *       summary: Reads a order by ID.
+ *       summary: Reads a company by ID.
  *       security:
  *        - bearerAuth: []
  *       parameters:
@@ -311,11 +237,11 @@ router.get('/', auth(['admin']), async (req, res) => {
  *           example: -_id,name
  *       responses:
  *         200:
- *           description: Order returned successfully.
+ *           description: Company returned successfully.
  *           content:
  *             application/json:
  *               schema:
- *                 $ref: '#/components/schemas/Order'
+ *                 $ref: '#/components/schemas/Company'
  *         401:
  *           $ref: '#/components/responses/AuthorizationError'
  *         404:
@@ -328,25 +254,37 @@ router.get('/:id', auth(['admin']), async (req, res) => {
     const error = new Error();
 
     error.name = 'NotFoundError';
-    error.message = "We couldn't find the order you are looking for.";
+    error.message = "We couldn't find the company you are looking for.";
 
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       throw error;
     }
 
-    const match = { _id: req.params.id };
+    const match = {};
 
     switch (req.admin.role) {
       case 'Super Admin':
-        if (req.query.company) {
-          match.company = req.query.company;
-        }
+        match._id = req.params.id;
+        break;
+
+      case 'Admin':
+        match.$and = [
+          {
+            _id: req.params.id,
+          },
+          {
+            _id: {
+              $ne: req.admin.company,
+            },
+          },
+        ];
         break;
 
       case 'Cashier':
-      case 'Admin':
-        match.company = req.admin.company;
-        break;
+        error.name = 'AuthorizationError';
+        error.message = "You aren't authorized to perform this action.";
+
+        throw error;
 
       default:
         break;
@@ -358,13 +296,13 @@ router.get('/:id', auth(['admin']), async (req, res) => {
       fields = req.query.fields.replace(/,/g, ' ');
     }
 
-    const order = await Order.findOne(match).select(fields).populate(populate);
+    const company = await Company.findOne(match).select(fields).populate(populate);
 
-    if (!order) {
+    if (!company) {
       throw error;
     }
 
-    res.json(order);
+    res.json(company);
   } catch (error) {
     const reformattedError = errorHandler.reformatAndLog(req.admin._id, error);
 
@@ -375,12 +313,12 @@ router.get('/:id', auth(['admin']), async (req, res) => {
 /**
  * @swagger
  * paths:
- *   /orders/{id}:
+ *   /companies/{id}:
  *     patch:
  *       tags:
- *         - orders
+ *         - companies
  *       operationId: updateById
- *       summary: Updates a order by ID.
+ *       summary: Updates a company by ID.
  *       security:
  *        - bearerAuth: []
  *       parameters:
@@ -401,65 +339,16 @@ router.get('/:id', auth(['admin']), async (req, res) => {
  *             schema:
  *               type: object
  *               properties:
- *                 admin:
+ *                 name:
  *                   type: string
- *                   example: e05x40a8161m495p500l684e
- *                 table:
- *                   type: string
- *                   example: e05x40a8161m495p500l684e
- *                 category:
- *                   type: string
- *                   example: e05x40a8161m495p500l684e
- *                 service:
- *                   type: string
- *                   example: 10
- *                 taxes:
- *                   type: string
- *                   example: 14
- *                 discount:
- *                   type: string
- *                   example: 14
- *                 status:
- *                   type: string
- *                   enum:
- *                     - Ordered
- *                     - Paid
- *                     - Cancelled
- *                     - Refunded
- *                   example: Paid
- *                 paymentType:
- *                   type: string
- *                   enum:
- *                     - Mixed
- *                     - Cash
- *                     - Card
- *                   example: Cash
- *                 products:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       product:
- *                         type: string
- *                         example: e05x40a8161m495p500l684e
- *                       price:
- *                         type: string
- *                         example: '100'
- *                       count:
- *                         type: number
- *                         example: 3
- *                     required:
- *                       - product
- *                       - price
- *                       - count
- *                   minItems: 1
+ *                   example: Shababek
  *       responses:
  *         200:
- *           description: Order updated successfully.
+ *           description: Company updated successfully.
  *           content:
  *             application/json:
  *               schema:
- *                 $ref: '#/components/schemas/Order'
+ *                 $ref: '#/components/schemas/Company'
  *         400:
  *           $ref: '#/components/responses/ClientError'
  *         401:
@@ -474,14 +363,14 @@ router.patch('/:id', auth(['admin']), async (req, res) => {
     const error = new Error();
 
     error.name = 'NotFoundError';
-    error.message = "We couldn't find the order you are looking for.";
+    error.message = "We couldn't find the company you are looking for.";
 
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       throw error;
     }
 
     const updatesKeys = Object.keys(req.body);
-    const allowedUpdatesKeys = ['status', 'paymentType', 'service', 'taxes', 'discount', 'products'];
+    const allowedUpdatesKeys = ['name'];
     const isValidOperation = updatesKeys.every((updatesKey) => allowedUpdatesKeys.includes(updatesKey));
 
     if (!isValidOperation) {
@@ -497,39 +386,42 @@ router.patch('/:id', auth(['admin']), async (req, res) => {
       throw error;
     }
 
-    const match = { _id: req.params.id };
+    const match = {};
 
     switch (req.admin.role) {
       case 'Super Admin':
-        if (req.query.company) {
-          match.company = req.query.company;
-        }
+        match._id = req.params.id;
+        break;
+
+      case 'Admin':
+        match.$and = [{ _id: req.params.id }, { _id: { $ne: req.admin.company } }];
         break;
 
       case 'Cashier':
-      case 'Admin':
-        match.company = req.admin.company;
-        break;
+        error.name = 'AuthorizationError';
+        error.message = "You aren't authorized to perform this action.";
+
+        throw error;
 
       default:
         break;
     }
 
-    const order = await Order.findOne(match);
+    const company = await Company.findOne(match);
 
-    if (!order) {
+    if (!company) {
       throw error;
     }
 
     updatesKeys.forEach((updatesKey) => {
-      order[updatesKey] = req.body[updatesKey];
+      company[updatesKey] = req.body[updatesKey];
     });
 
-    await order.save();
+    await company.save();
 
-    await Order.populate(order, populate);
+    await Company.populate(company, populate);
 
-    res.json(order);
+    res.json(company);
   } catch (error) {
     const reformattedError = errorHandler.reformatAndLog(req.admin._id, error);
 
@@ -540,12 +432,12 @@ router.patch('/:id', auth(['admin']), async (req, res) => {
 /**
  * @swagger
  * paths:
- *   /orders/{id}:
+ *   /companies/{id}:
  *     delete:
  *       tags:
- *         - orders
+ *         - companies
  *       operationId: deleteById
- *       summary: Deletes a order by ID.
+ *       summary: Deletes a company by ID.
  *       security:
  *        - bearerAuth: []
  *       parameters:
@@ -562,7 +454,7 @@ router.patch('/:id', auth(['admin']), async (req, res) => {
  *           example: admin
  *       responses:
  *         200:
- *           description: Order deleted successfully.
+ *           description: Company deleted successfully.
  *         401:
  *           $ref: '#/components/responses/AuthorizationError'
  *         404:
@@ -575,46 +467,39 @@ router.delete('/:id', auth(['admin']), async (req, res) => {
     const error = new Error();
 
     error.name = 'NotFoundError';
-    error.message = "We couldn't find the order you are looking for.";
+    error.message = "We couldn't find the company you are looking for.";
 
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       throw error;
     }
 
+    const match = {};
+
     switch (req.admin.role) {
+      case 'Super Admin':
+        match._id = req.params.id;
+        break;
+
       case 'Admin':
+        match.$and = [{ _id: req.params.id }, { _id: { $ne: req.admin.company } }];
+        break;
+
       case 'Cashier':
         error.name = 'AuthorizationError';
         error.message = "You aren't authorized to perform this action.";
-
         throw error;
 
       default:
         break;
     }
 
-    const match = { _id: req.params.id };
+    const company = await Company.findOne(match);
 
-    switch (req.admin.role) {
-      case 'Admin':
-        match.company = req.admin.company;
-        break;
-
-      case 'Cashier':
-        error.name = 'AuthorizationError';
-        error.message = "You aren't authorized to perform this action.";
-
-        throw error;
-
-      default:
-        break;
-    }
-
-    const order = await Order.findOneAndDelete(match);
-
-    if (!order) {
+    if (!company) {
       throw error;
     }
+
+    await Company.deleteOne(match);
 
     res.json();
   } catch (error) {

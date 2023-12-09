@@ -1,21 +1,20 @@
 const mongoose = require('mongoose');
 
+const Admin = require('./Admin');
+
 /**
  * @swagger
  * components:
  *   schemas:
- *     Table:
+ *     Company:
  *       type: object
  *       properties:
  *         _id:
  *           type: string
  *           example: e05x40a8161m495p500l684e
- *         company:
- *           type: string
- *           example: e05x40a8161m495p500l684e
  *         name:
  *           type: string
- *           example: t13
+ *           example: Shababek
  *         createdAt:
  *           type: string
  *           format: date-time
@@ -30,25 +29,15 @@ const mongoose = require('mongoose');
  *           example: 0
  *       required:
  *         - _id
- *         - company
  *         - name
  */
-const tableSchema = new mongoose.Schema(
+const companySchema = new mongoose.Schema(
   {
-    company: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Company',
-      required: [true, 'A company ID must be attached to the table.'],
-    },
     name: {
       type: String,
+      unique: true,
       required: [true, "Name can't be blank."],
       trim: true,
-    },
-    isActive: {
-      type: Boolean,
-      required: [true, "Active status can't be blank."],
-      default: true,
     },
   },
   {
@@ -56,6 +45,14 @@ const tableSchema = new mongoose.Schema(
   },
 );
 
-const Table = mongoose.model('Table', tableSchema);
+companySchema.pre('remove', async function (next) {
+  const company = this;
 
-module.exports = Table;
+  await Admin.deleteMany({ company: company._id });
+
+  next();
+});
+
+const Company = mongoose.model('Company', companySchema);
+
+module.exports = Company;

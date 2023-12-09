@@ -44,7 +44,7 @@ module.exports.reformatAndLog = (userId, error) => {
         userId ? `[${userId}] ` : ''
       }The information you've entered is invalid for the following ${pluralize(
         'field',
-        errorsKeys.length
+        errorsKeys.length,
       )}: ${errorsKeys.join(', ')}.`;
       statusCode = 400;
 
@@ -52,7 +52,7 @@ module.exports.reformatAndLog = (userId, error) => {
       break;
     }
 
-    case 'MongoError':
+    case 'MongoServerError':
       if (error.code === 11000) {
         errors = {};
 
@@ -66,7 +66,7 @@ module.exports.reformatAndLog = (userId, error) => {
           userId ? `[${userId}] ` : ''
         }The information you've entered is invalid for the following ${pluralize(
           'field',
-          errorsKeys.length
+          errorsKeys.length,
         )}: ${errorsKeys.join(', ')}.`;
         statusCode = 400;
 
@@ -106,9 +106,5 @@ module.exports.reformatAndLog = (userId, error) => {
       break;
   }
 
-  return {
-    message: error.message,
-    statusCode,
-    errors,
-  };
+  return { message: error.message, statusCode, errors };
 };
