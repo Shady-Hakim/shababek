@@ -22,23 +22,13 @@ const jwt = require('jsonwebtoken');
  *         lastName:
  *           type: string
  *           example: Hollander
- *         gender:
- *           type: string
- *           enum:
- *             - Male
- *             - Female
- *           example: Female
- *         birthdate:
- *           type: string
- *           format: date-time
- *           example: 1994-01-01T00:00:00.000Z
  *         phoneNumber:
  *           type: string
  *           example: '01007683940'
  *         email:
  *           type: string
  *           format: email
- *           example: tesuperadmin@shababeek.com
+ *           example: tesuperadmin@ticketegypt.com
  *         password:
  *           type: string
  *           format: password
@@ -47,11 +37,10 @@ const jwt = require('jsonwebtoken');
  *         role:
  *           type: string
  *           enum:
- *             - TE Super Admin
- *             - TE Admin
  *             - Super Admin
  *             - Admin
- *           example: TE Super Admin
+ *             - Cashier
+ *           example: Super Admin
  *         tokens:
  *           type: array
  *           items:
@@ -87,6 +76,11 @@ const jwt = require('jsonwebtoken');
  */
 const adminSchema = new mongoose.Schema(
   {
+    company: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Company',
+      required: [true, 'A company ID must be attached to the admin.'],
+    },
     firstName: {
       type: String,
       required: [true, "First name can't be blank."],
@@ -117,10 +111,7 @@ const adminSchema = new mongoose.Schema(
       type: String,
       required: [true, "Password can't be blank."],
       validate: {
-        validator: (value) =>
-          validator.isLength(value, {
-            min: 8,
-          }),
+        validator: (value) => validator.isLength(value, { min: 8 }),
         message: 'Your password must be at least 8 characters long.',
       },
     },
@@ -132,15 +123,9 @@ const adminSchema = new mongoose.Schema(
         message: "The role you've chosen is invalid.",
       },
     },
-    tokens: [
-      {
-        token: String,
-      },
-    ],
+    tokens: [{ token: String }],
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true },
 );
 
 adminSchema.statics.findByCredentials = async (email, password) => {
@@ -153,9 +138,7 @@ adminSchema.statics.findByCredentials = async (email, password) => {
     throw error;
   }
 
-  const admin = await Admin.findOne({
-    email,
-  });
+  const admin = await Admin.findOne({ email });
 
   if (!admin) {
     throw error;
@@ -172,16 +155,9 @@ adminSchema.statics.findByCredentials = async (email, password) => {
 
 adminSchema.methods.generateAuthToken = async function () {
   const admin = this;
-  const token = jwt.sign(
-    {
-      id: admin.id,
-    },
-    process.env.JWT_SECRET
-  );
+  const token = jwt.sign({ id: admin.id }, process.env.JWT_SECRET);
 
-  admin.tokens = admin.tokens.concat({
-    token,
-  });
+  admin.tokens = admin.tokens.concat({ token });
 
   await admin.save();
 

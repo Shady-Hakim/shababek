@@ -8,7 +8,7 @@ const errorHandler = require('../../errorHandler');
 
 const router = express.Router();
 
-const populate = [];
+const populate = [{ path: 'company', options: { select: 'name' } }];
 
 /**
  * @swagger
@@ -70,8 +70,17 @@ const populate = [];
  */
 router.post('/', auth(['admin']), async (req, res) => {
   try {
+    let category;
+
     switch (req.admin.role) {
+      case 'Super Admin':
+        category = new Category({ ...req.body, company: req.body.company ? req.body.company : req.admin.company });
+        break;
+
       case 'Admin':
+        category = new Category({ ...req.body, company: req.admin.company });
+        break;
+
       case 'Cashier': {
         const error = new Error();
 
@@ -84,8 +93,6 @@ router.post('/', auth(['admin']), async (req, res) => {
       default:
         break;
     }
-
-    const category = new Category(req.body);
 
     await category.save();
 
@@ -153,14 +160,26 @@ router.post('/', auth(['admin']), async (req, res) => {
 router.get('/', auth(['admin']), async (req, res) => {
   try {
     const match = {};
-
     let fields;
 
+    switch (req.admin.role) {
+      case 'Super Admin':
+        if (req.query.company) {
+          match.company = req.query.company;
+        }
+        break;
+
+      case 'Admin':
+      case 'Cashier':
+        match.company = req.admin.company;
+        break;
+
+      default:
+        break;
+    }
+
     if (req.query.isActive) {
-      match.isActive = {
-        true: true,
-        false: false,
-      }[req.query.isActive];
+      match.isActive = { true: true, false: false }[req.query.isActive];
     }
 
     if (req.query.fields) {
@@ -258,9 +277,23 @@ router.get('/:id', auth(['admin']), async (req, res) => {
       throw error;
     }
 
-    const match = {
-      _id: req.params.id,
-    };
+    const match = { _id: req.params.id };
+
+    switch (req.admin.role) {
+      case 'Super Admin':
+        if (req.query.company) {
+          match.company = req.query.company;
+        }
+        break;
+
+      case 'Cashier':
+      case 'Admin':
+        match.company = req.admin.company;
+        break;
+
+      default:
+        break;
+    }
 
     let fields;
 
@@ -348,7 +381,7 @@ router.patch('/:id', auth(['admin']), async (req, res) => {
     }
 
     const updatesKeys = Object.keys(req.body);
-    const allowedUpdatesKeys = ['description', 'isActive'];
+    const allowedUpdatesKeys = ['name', 'description', 'isActive'];
     const isValidOperation = updatesKeys.every((updatesKey) => allowedUpdatesKeys.includes(updatesKey));
 
     if (!isValidOperation) {
@@ -364,8 +397,13 @@ router.patch('/:id', auth(['admin']), async (req, res) => {
       throw error;
     }
 
+    const match = { _id: req.params.id };
+
     switch (req.admin.role) {
       case 'Admin':
+        match.company = req.admin.company;
+        break;
+
       case 'Cashier':
         error.name = 'AuthorizationError';
         error.message = "You aren't authorized to perform this action.";
@@ -375,10 +413,6 @@ router.patch('/:id', auth(['admin']), async (req, res) => {
       default:
         break;
     }
-
-    const match = {
-      _id: req.params.id,
-    };
 
     const category = await Category.findOne(match);
 
@@ -446,8 +480,13 @@ router.delete('/:id', auth(['admin']), async (req, res) => {
       throw error;
     }
 
+    const match = { _id: req.params.id };
+
     switch (req.admin.role) {
       case 'Admin':
+        match.company = req.admin.company;
+        break;
+
       case 'Cashier':
         error.name = 'AuthorizationError';
         error.message = "You aren't authorized to perform this action.";
@@ -458,17 +497,13 @@ router.delete('/:id', auth(['admin']), async (req, res) => {
         break;
     }
 
-    const match = {
-      _id: req.params.id,
-    };
-
     const category = await Category.findOne(match);
 
     if (!category) {
       throw error;
     }
 
-    await category.remove();
+    await category.deleteOne();
 
     res.json();
   } catch (error) {

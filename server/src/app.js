@@ -14,10 +14,11 @@ app.use(express.static(path.join(__dirname, '../public')));
 app.use(cors());
 
 app.use('/api/v1/admins', require('./routes/v1/admins'));
-app.use('/api/v1/tables', require('./routes/v1/tables'));
 app.use('/api/v1/categories', require('./routes/v1/categories'));
-app.use('/api/v1/products', require('./routes/v1/products'));
+app.use('/api/v1/companies', require('./routes/v1/companies'));
 app.use('/api/v1/orders', require('./routes/v1/orders'));
+app.use('/api/v1/products', require('./routes/v1/products'));
+app.use('/api/v1/tables', require('./routes/v1/tables'));
 
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '../../client/build')));
@@ -33,16 +34,8 @@ if (process.env.NODE_ENV === 'production') {
       swaggerJsdoc({
         definition: {
           openapi: '3.0.0',
-          info: {
-            title: 'Shababeek',
-            description: 'Cafe point of sale',
-            version: '1.0.0',
-          },
-          servers: [
-            {
-              url: 'http://localhost:5001/api/v1',
-            },
-          ],
+          info: { title: 'Shababek', description: 'Cafe point of sale', version: '0.1.0' },
+          servers: [{ url: 'http://localhost:5001/api/v1' }],
         },
         apis: [
           `${path.join(__dirname, 'models/*.js')}`,
@@ -50,8 +43,8 @@ if (process.env.NODE_ENV === 'production') {
           `${path.join(__dirname, 'middleware/*.js')}`,
           `${path.join(__dirname, 'errorHandler.js')}`,
         ],
-      })
-    )
+      }),
+    ),
   );
 }
 

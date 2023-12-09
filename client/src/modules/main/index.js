@@ -17,20 +17,19 @@ function Copyright(props) {
   );
 }
 
-// TODO remove, this demo shouldn't need to reset the theme.
-const defaultTheme = createTheme();
-
 export default function Dashboard() {
   const [open, setOpen] = React.useState(true);
+  // TODO remove, this demo shouldn't need to reset the theme.
+  const defaultTheme = createTheme();
   const toggleDrawer = () => {
     setOpen(!open);
   };
 
+  const isAuthenticated = true;
+
   return (
     <ThemeProvider theme={defaultTheme}>
-      {false ? (
-        <RouterProvider router={NonLoggedInRouter} />
-      ) : (
+      {isAuthenticated ? (
         <Box sx={{ display: 'flex' }}>
           <CssBaseline />
           <TopBar toggleDrawer={() => toggleDrawer()} open={open} />
@@ -52,6 +51,8 @@ export default function Dashboard() {
             </Container>
           </Box>
         </Box>
+      ) : (
+        <RouterProvider router={NonLoggedInRouter} />
       )}
     </ThemeProvider>
   );

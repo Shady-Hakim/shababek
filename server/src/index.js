@@ -3,9 +3,7 @@ const path = require('path');
 if (process.env.NODE_ENV !== 'production') {
   const dotenv = require('dotenv'); // eslint-disable-line
 
-  dotenv.config({
-    path: path.resolve(__dirname, '../.env.development.local'),
-  });
+  dotenv.config({ path: path.resolve(__dirname, '../.env.development.local') });
 }
 
 const app = require('./app');

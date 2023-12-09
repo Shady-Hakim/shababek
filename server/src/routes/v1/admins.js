@@ -8,7 +8,7 @@ const errorHandler = require('../../errorHandler');
 
 const router = express.Router();
 
-const populate = [];
+const populate = [{ path: 'company', options: { select: 'name' } }];
 
 /**
  * @swagger
@@ -52,12 +52,12 @@ const populate = [];
  *                 email:
  *                   type: string
  *                   format: email
- *                   example: tesuperadmin@shababeek.com
+ *                   example: superadmin@iposdahab.com
  *                 password:
  *                   type: string
  *                   format: password
  *                   minLength: 8
- *                   example: shababeek
+ *                   example: iposdahab
  *               required:
  *                 - firstName
  *                 - lastName
@@ -80,7 +80,32 @@ const populate = [];
  */
 router.post('/', auth(['admin']), async (req, res) => {
   try {
-    const admin = new Admin({ ...req.body });
+    const error = new Error();
+    let admin;
+
+    error.name = 'AuthorizationError';
+    error.message = "You aren't authorized to perform this action.";
+
+    switch (req.admin.role) {
+      case 'Super Admin':
+        admin = new Admin({ ...req.body, company: req.body.company ? req.body.company : req.admin.company });
+        break;
+
+      case 'Admin':
+        if (req.body.role && req.body.role === 'Cashier') {
+          admin = new Admin({ ...req.body, company: req.admin.company });
+        } else {
+          throw error;
+        }
+
+        break;
+
+      case 'Cashier':
+        throw error;
+
+      default:
+        break;
+    }
 
     await admin.save();
 
@@ -88,12 +113,9 @@ router.post('/', auth(['admin']), async (req, res) => {
 
     await Admin.populate(admin, populate);
 
-    res.status(201).json({
-      admin,
-      token,
-    });
+    res.status(201).json({ admin, token });
   } catch (error) {
-    const reformattedError = errorHandler.reformatAndLog(req.accessCode.admin, error);
+    const reformattedError = errorHandler.reformatAndLog(req.admin._id, error);
 
     res.status(reformattedError.statusCode).json(reformattedError);
   }
@@ -126,12 +148,12 @@ router.post('/', auth(['admin']), async (req, res) => {
  *                 email:
  *                   type: string
  *                   format: email
- *                   example: tesuperadmin@shababeek.com
+ *                   example: superadmin@iposdahab.com
  *                 password:
  *                   type: string
  *                   format: password
  *                   minLength: 8
- *                   example: shababeek
+ *                   example: iposdahab
  *               required:
  *                 - email
  *                 - password
@@ -164,10 +186,7 @@ router.post('/login', auth(['guest']), async (req, res) => {
 
     await Admin.populate(admin, populate);
 
-    res.json({
-      admin,
-      token,
-    });
+    res.json({ admin, token });
   } catch (error) {
     const reformattedError = errorHandler.reformatAndLog(undefined, error);
 
@@ -320,7 +339,7 @@ router.get('/me', auth(['admin']), async (req, res) => {
  *           name: role
  *           schema:
  *             type: string
- *           example: teSuperAdmin
+ *           example: SuperAdmin
  *         - in: query
  *           name: fields
  *           schema:
@@ -358,6 +377,34 @@ router.get('/me', auth(['admin']), async (req, res) => {
 router.get('/', auth(['admin']), async (req, res) => {
   try {
     const match = {};
+
+    switch (req.admin.role) {
+      case 'Super Admin':
+        if (req.query.company) {
+          match.company = req.query.company;
+        }
+
+        if (req.query.role) {
+          match.role = { superAdmin: 'Super Admin', admin: 'Admin', cashier: 'Cashier' }[req.query.role];
+        }
+        break;
+
+      case 'Admin':
+        match.company = req.admin.company;
+        break;
+
+      case 'Cashier': {
+        const error = new Error();
+
+        error.name = 'AuthorizationError';
+        error.message = "You aren't authorized to perform this action.";
+
+        throw error;
+      }
+
+      default:
+        break;
+    }
 
     let fields;
 
@@ -456,9 +503,22 @@ router.get('/:id', auth(['admin']), async (req, res) => {
       throw error;
     }
 
-    const match = {
-      _id: req.params.id,
-    };
+    const match = { _id: req.params.id };
+
+    switch (req.admin.role) {
+      case 'Admin':
+        match.company = req.admin.company;
+        break;
+
+      case 'Cashier':
+        error.name = 'AuthorizationError';
+        error.message = "You aren't authorized to perform this action.";
+
+        throw error;
+
+      default:
+        break;
+    }
 
     let fields;
 
@@ -509,14 +569,6 @@ router.get('/:id', auth(['admin']), async (req, res) => {
  *                 lastName:
  *                   type: string
  *                   example: Hollander
- *                 gender:
- *                   type: string
- *                   enum: ['Male', 'Female']
- *                   example: Female
- *                 birthdate:
- *                   type: string
- *                   format: date-time
- *                   example: 1994-01-01T00:00:00.000Z
  *                 phoneNumber:
  *                   type: string
  *                   example: 01007683940
@@ -524,7 +576,7 @@ router.get('/:id', auth(['admin']), async (req, res) => {
  *                   type: string
  *                   format: password
  *                   minLength: 8
- *                   example: shababeek
+ *                   example: iposdahab
  *       responses:
  *         200:
  *           description: Admin updated successfully.
@@ -611,14 +663,6 @@ router.patch('/me', auth(['admin']), async (req, res) => {
  *                 lastName:
  *                   type: string
  *                   example: Hollander
- *                 gender:
- *                   type: string
- *                   enum: ['Male', 'Female']
- *                   example: Female
- *                 birthdate:
- *                   type: string
- *                   format: date-time
- *                   example: 1994-01-01T00:00:00.000Z
  *                 phoneNumber:
  *                   type: string
  *                   example: 01007683940
@@ -626,7 +670,7 @@ router.patch('/me', auth(['admin']), async (req, res) => {
  *                   type: string
  *                   format: password
  *                   minLength: 8
- *                   example: shababeek
+ *                   example: iposdahab
  *       responses:
  *         200:
  *           description: Admin updated successfully.
@@ -669,9 +713,22 @@ router.patch('/:id', auth(['admin']), async (req, res) => {
       throw error;
     }
 
-    const match = {
-      _id: req.params.id,
-    };
+    const match = { _id: req.params.id };
+
+    switch (req.admin.role) {
+      case 'Admin':
+        match.company = req.admin.company;
+        break;
+
+      case 'Cashier':
+        error.name = 'AuthorizationError';
+        error.message = "You aren't authorized to perform this action.";
+
+        throw error;
+
+      default:
+        break;
+    }
 
     const admin = await Admin.findOne(match);
 
@@ -724,7 +781,7 @@ router.patch('/:id', auth(['admin']), async (req, res) => {
  */
 router.delete('/me', auth(['admin']), async (req, res) => {
   try {
-    await req.admin.remove();
+    await Admin.findOneAndDelete({ _id: req.admin._id });
 
     res.json();
   } catch (error) {
@@ -778,9 +835,22 @@ router.delete('/:id', auth(['admin']), async (req, res) => {
       throw error;
     }
 
-    const match = {
-      _id: req.params.id,
-    };
+    const match = { _id: req.params.id };
+
+    switch (req.admin.role) {
+      case 'Super Admin':
+        match.company = req.admin.company;
+        break;
+
+      case 'Cashier':
+        error.name = 'AuthorizationError';
+        error.message = "You aren't authorized to perform this action.";
+
+        throw error;
+
+      default:
+        break;
+    }
 
     const admin = await Admin.findOneAndDelete(match);
 
