@@ -3,8 +3,12 @@ import MenuIcon from '@mui/icons-material/Menu';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import { Typography, styled, Badge, IconButton, Toolbar } from '@mui/material';
 import MuiAppBar from '@mui/material/AppBar';
+import { useSelector } from 'react-redux';
+import { selectUser } from '../../redux/slices/authSlice';
 
 function TopBar({ toggleDrawer, open }) {
+  const user = useSelector(selectUser);
+
   const drawerWidth = 240;
   const AppBar = styled(MuiAppBar, {
     shouldForwardProp: (prop) => prop !== 'open',
@@ -42,7 +46,7 @@ function TopBar({ toggleDrawer, open }) {
           <MenuIcon />
         </IconButton>
         <Typography component='h1' variant='h6' color='inherit' noWrap sx={{ flexGrow: 1 }}>
-          Shababeek
+          {user?.admin?.firstName} {user?.admin?.lastName}
         </Typography>
         <IconButton color='inherit'>
           <Badge badgeContent={4} color='secondary'>

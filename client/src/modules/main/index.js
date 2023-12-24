@@ -3,6 +3,8 @@ import { RouterProvider } from 'react-router-dom';
 import { Link, CssBaseline, Box, Toolbar, Typography, Container, createTheme, ThemeProvider } from '@mui/material';
 import { Navbar, TopBar } from '../common/components';
 import { NonLoggedInRouter, Router } from '../router';
+import { useSelector } from 'react-redux';
+import { selectIsAuthenticated } from '../redux/slices/authSlice';
 
 function Copyright(props) {
   return (
@@ -25,7 +27,7 @@ export default function Dashboard() {
     setOpen(!open);
   };
 
-  const isAuthenticated = true;
+  const isAuthenticated = useSelector(selectIsAuthenticated);
 
   return (
     <ThemeProvider theme={defaultTheme}>

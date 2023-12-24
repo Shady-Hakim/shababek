@@ -1,5 +1,6 @@
 import { createBrowserRouter } from 'react-router-dom';
 import { Tables, Menu, Orders, SignIn } from '../../pages';
+import NotFound from '../../pages/NotFound';
 
 export const Router = createBrowserRouter([
   {
@@ -14,11 +15,19 @@ export const Router = createBrowserRouter([
     path: '/orders',
     element: <Orders />,
   },
+  {
+    path: '*',
+    element: <NotFound />,
+  },
 ]);
 
 export const NonLoggedInRouter = createBrowserRouter([
   {
     path: '/',
     element: <SignIn />,
+  },
+  {
+    path: '*',
+    element: <NotFound />,
   },
 ]);
