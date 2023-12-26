@@ -7,7 +7,7 @@ import { Link, CssBaseline, Box, Toolbar, Typography, Container, CircularProgres
 
 import { Navbar, TopBar } from '../common/components';
 import { useReadMeMutation } from '../core/authentication/authentication.action';
-import { SignIn, NotFound, Tables, Menu, Orders } from '../../pages';
+import { SignIn, NotFound, Tables, Products, Orders } from '../../pages';
 import { PrivateOutlet } from '../core/authorization/private-outlet';
 
 const App = () => {
@@ -87,7 +87,7 @@ const App = () => {
               path='/tables/:tableNumber'
               element={
                 <PrivateOutlet>
-                  <Menu />
+                  <Products />
                 </PrivateOutlet>
               }
             />

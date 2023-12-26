@@ -6,7 +6,7 @@ import { Typography } from '@mui/material';
 import CategoriesBar from '../modules/common/components/categoriesBar';
 import ProductItem from '../modules/common/components/productItem';
 import { addTable } from '../modules/common/table';
-import Order from '../modules/common/order';
+import { Order } from '../modules/products/components';
 
 const products = [
   { id: 1, name: 'A', price: 100 },
@@ -17,9 +17,10 @@ const products = [
   { id: 6, name: 'F', price: 600 },
 ];
 
-const Menu = () => {
+const Products = () => {
   let { tableNumber } = useParams();
   const dispatch = useDispatch();
+
   useEffect(() => {
     dispatch(addTable(tableNumber));
   }, [dispatch, tableNumber]);
@@ -45,4 +46,4 @@ const Menu = () => {
   );
 };
 
-export default Menu;
+export default Products;
