@@ -305,7 +305,7 @@ router.get('/me', auth(['admin']), async (req, res) => {
   try {
     await Admin.populate(req.admin, populate);
 
-    res.json(req.admin);
+    res.json({ admin: req.admin, token: req.token });
   } catch (error) {
     const reformattedError = errorHandler.reformatAndLog(req.admin._id, error);
 

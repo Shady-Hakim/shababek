@@ -4,7 +4,7 @@ import { Divider, Grid, Paper, TextField, Typography, Button } from '@mui/materi
 import { People, TableRestaurant } from '@mui/icons-material';
 import Receipt from './receipt';
 
-function Order() {
+const Order = () => {
   const tableNumber = useSelector((state) => state.table.number);
   const cartItems = useSelector((state) => state.cart.cartItems);
   const [calculations, setCalculations] = useState();
@@ -61,6 +61,6 @@ function Order() {
       )}
     </Paper>
   );
-}
+};
 
 export default Order;

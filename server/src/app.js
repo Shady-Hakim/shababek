@@ -11,7 +11,12 @@ db.seed();
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../public')));
-app.use(cors());
+app.use(
+  cors({
+    credentials: true,
+    origin: ['http://localhost:3001'],
+  }),
+);
 
 app.use('/api/v1/admins', require('./routes/v1/admins'));
 app.use('/api/v1/categories', require('./routes/v1/categories'));

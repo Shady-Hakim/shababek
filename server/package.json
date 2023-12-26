@@ -6,7 +6,7 @@
   },
   "main": "src/index.js",
   "scripts": {
-    "install:clean": "rm -rf yarn.lock node_modules && yarn",
+    "setup:clean": "rm -rf yarn.lock node_modules && yarn",
     "start:dev": "nodemon src/index.js",
     "start:test": "jest --watchAll",
     "start:prod": "node src/index.js"

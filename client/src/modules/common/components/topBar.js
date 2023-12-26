@@ -3,8 +3,11 @@ import MenuIcon from '@mui/icons-material/Menu';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import { Typography, styled, Badge, IconButton, Toolbar } from '@mui/material';
 import MuiAppBar from '@mui/material/AppBar';
+import { useSelector } from 'react-redux';
 
 function TopBar({ toggleDrawer, open }) {
+  const { admin } = useSelector((state) => state.authentication);
+
   const drawerWidth = 240;
   const AppBar = styled(MuiAppBar, {
     shouldForwardProp: (prop) => prop !== 'open',
@@ -26,10 +29,7 @@ function TopBar({ toggleDrawer, open }) {
 
   return (
     <AppBar position='absolute' open={open}>
-      <Toolbar
-        sx={{
-          pr: '24px', // keep right padding when drawer closed
-        }}>
+      <Toolbar sx={{ pr: '24px' }}>
         <IconButton
           edge='start'
           color='inherit'
@@ -42,7 +42,7 @@ function TopBar({ toggleDrawer, open }) {
           <MenuIcon />
         </IconButton>
         <Typography component='h1' variant='h6' color='inherit' noWrap sx={{ flexGrow: 1 }}>
-          Shababeek
+          {admin?.firstName} {admin?.lastName}
         </Typography>
         <IconButton color='inherit'>
           <Badge badgeContent={4} color='secondary'>
