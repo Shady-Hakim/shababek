@@ -1,7 +1,7 @@
 import React from 'react';
 import Grid from '@mui/material/Unstable_Grid2';
 import { Typography } from '@mui/material';
-import Order from '../modules/common/order';
+import { OrderDetails } from '../modules/orders/components';
 import OrdersTable from '../modules/common/components/ordersTable';
 
 const Orders = () => {
@@ -16,7 +16,7 @@ const Orders = () => {
         </Grid>
       </Grid>
       <Grid item xs={12} md={4} lg={4}>
-        <Order />
+        <OrderDetails />
       </Grid>
     </Grid>
   );

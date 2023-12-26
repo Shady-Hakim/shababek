@@ -1,7 +1,7 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
 import { TableCell, TableRow, TextField } from '@mui/material';
-import { changeQty, removeItem } from '../cart';
+import { changeQty, removeItem } from '../../common/cart';
 import { Button } from '@mui/base';
 
 const ItemRow = ({ row }) => {
