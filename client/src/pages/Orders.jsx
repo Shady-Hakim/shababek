@@ -4,7 +4,7 @@ import { Typography } from '@mui/material';
 import Order from '../modules/common/order';
 import OrdersTable from '../modules/common/components/ordersTable';
 
-function Orders() {
+const Orders = () => {
   return (
     <Grid container spacing={3}>
       <Grid item xs={12} md={8} lg={8}>
@@ -20,6 +20,6 @@ function Orders() {
       </Grid>
     </Grid>
   );
-}
+};
 
 export default Orders;

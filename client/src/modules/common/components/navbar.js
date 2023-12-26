@@ -1,24 +1,28 @@
 import * as React from 'react';
 import { styled } from '@mui/material/styles';
 import MuiDrawer from '@mui/material/Drawer';
+import { useNavigate } from 'react-router-dom';
 import { ListItemText, ListItemIcon, ListItemButton, IconButton, Divider, Toolbar, List } from '@mui/material';
 import { Settings, BarChart, ShoppingCart, ChevronLeft, TableRestaurant } from '@mui/icons-material';
 
 function Navbar({ toggleDrawer, open }) {
+  const navigation = useNavigate();
   const mainListItems = (
     <React.Fragment>
-      <ListItemButton href={'/'}>
+      <ListItemButton onClick={() => navigation('/')}>
         <ListItemIcon>
           <TableRestaurant />
         </ListItemIcon>
         <ListItemText primary='Tables' />
       </ListItemButton>
-      <ListItemButton href={'/orders'}>
+
+      <ListItemButton onClick={() => navigation('/orders')}>
         <ListItemIcon>
           <ShoppingCart />
         </ListItemIcon>
         <ListItemText primary='Orders' />
       </ListItemButton>
+
       <ListItemButton>
         <ListItemIcon>
           <BarChart />

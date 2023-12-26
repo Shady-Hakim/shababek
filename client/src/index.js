@@ -1,12 +1,19 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import axios from 'axios';
+import React, { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import { Provider } from 'react-redux';
+import { ThemeProvider, createTheme } from '@mui/material';
 
-import App from './App';
-import { getUrl } from './modules/common/util';
+import App from './modules/app/app';
+import store from './modules/core/store';
 
-if (process.env.NODE_ENV === 'development') {
-  axios.defaults.baseURL = getUrl('server');
-}
+const root = createRoot(document.getElementById('root'));
 
-ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+root.render(
+  <StrictMode>
+    <Provider store={store}>
+      <ThemeProvider theme={createTheme()}>
+        <App />
+      </ThemeProvider>
+    </Provider>
+  </StrictMode>
+);

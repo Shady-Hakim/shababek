@@ -1,9 +1,9 @@
 import React from 'react';
-import Grid from '@mui/material/Unstable_Grid2';
-import table from '../assets/images/table.png';
-import { Typography, Paper } from '@mui/material';
-
+import { Unstable_Grid2 as Grid, Typography, Paper, Box } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import { experimentalStyled as styled } from '@mui/material/styles';
+
+import table from '../assets/images/table.png';
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
@@ -14,13 +14,14 @@ const Item = styled(Paper)(({ theme }) => ({
 }));
 
 function TableItem({ index }) {
+  const navigation = useNavigate();
   return (
     <Grid xs={2} sm={4} md={4}>
       <Item>
-        <a href={`/tables/${index + 1}`}>
+        <Box onClick={() => navigation(`/tables/${index + 1}`)}>
           <Typography>{index + 1}</Typography>
           <img src={table} alt={'table'} loading='lazy' />
-        </a>
+        </Box>
       </Item>
     </Grid>
   );

@@ -6,10 +6,11 @@
   },
   "description": "Cafe Point of sale",
   "scripts": {
-    "install:clean": "rm -rf yarn.lock node_modules && yarn && cd server && yarn install:clean && cd ../client && yarn install:clean",
+    "setup": "yarn && cd server && yarn && cd ../client && yarn",
+    "setup:clean": "rm -rf yarn.lock node_modules && yarn && cd server && yarn setup:clean && cd ../client && yarn setup:clean",
     "start:dev": "concurrently \"cd server && yarn start:dev\" \"cd client && yarn start:dev\"",
     "start:test": "cd server && yarn test",
-    "heroku-postbuild": "cd server && yarn install:clean && cd ../client && yarn install:clean && yarn start:prod",
+    "heroku-postbuild": "cd server && yarn setup:clean && cd ../client && yarn setup:clean && yarn start:prod",
     "start": "cd server && yarn start:prod"
   },
   "devDependencies": {

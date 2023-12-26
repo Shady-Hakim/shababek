@@ -1,26 +1,13 @@
-import React, { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import React from 'react';
 import { Formik, Form, Field } from 'formik';
 import * as yup from 'yup';
 import { Avatar, Button, CssBaseline, TextField, Link, Grid, Box, Typography, Container } from '@mui/material';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import { useLoginMutation } from '../modules/redux/api/auth';
-import { setUser } from '../modules/redux/slices/authSlice';
 
-const validationSchema = yup.object({
-  email: yup.string().required('Email is required').email('Invalid email format'),
-  password: yup.string().required('Password is required'),
-});
+import { useLoginMutation } from '../modules/core/authentication/authentication.action';
 
-export default function SignIn() {
-  const dispatch = useDispatch();
-  const [login, { data, isLoading, isError, error, isSuccess }] = useLoginMutation();
-
-  useEffect(() => {
-    if (isSuccess) {
-      dispatch(setUser(data));
-    }
-  }, [data, dispatch, isSuccess]);
+const SignIn = () => {
+  const [login, { isLoading, isError, error }] = useLoginMutation();
 
   return (
     <Container component='main' maxWidth='xs'>
@@ -33,11 +20,27 @@ export default function SignIn() {
           Sign in
         </Typography>
         <Formik
-          initialValues={{
-            email: '',
-            password: '',
-          }}
-          validationSchema={validationSchema}
+          initialValues={
+            process.env.NODE_ENV === 'production'
+              ? {
+                  email: '',
+                  password: '',
+                }
+              : {
+                  email: 'superadmin@iposdahab.com',
+                  password: 'iposdahab',
+                }
+          }
+          validationSchema={yup.object({
+            email: yup
+              .string()
+              .required("Email address can't be blank.")
+              .email("The email address you've entered is invalid."),
+            password: yup
+              .string()
+              .required("Password can't be blank.")
+              .min(8, 'Your password must be at least 8 characters long.'),
+          })}
           onSubmit={async (values) => {
             try {
               await login(values);
@@ -73,7 +76,7 @@ export default function SignIn() {
             </Button>
             {isError && (
               <Typography sx={styles.errorTypography} align='center'>
-                {error.data.message}
+                {error && error.data && error.data.message}
               </Typography>
             )}
             <Grid container>
@@ -96,29 +99,14 @@ export default function SignIn() {
       </Typography>
     </Container>
   );
-}
+};
 
 const styles = {
-  container: {
-    marginTop: 8,
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-  },
-  avatar: {
-    m: 1,
-    bgcolor: 'secondary.main',
-  },
-  form: {
-    mt: 3,
-  },
-  submitButton: {
-    mt: 3,
-    mb: 2,
-  },
-  errorTypography: {
-    variant: 'body2',
-    color: 'error',
-    align: 'center',
-  },
+  container: { marginTop: 8, display: 'flex', flexDirection: 'column', alignItems: 'center' },
+  avatar: { m: 1, bgcolor: 'secondary.main' },
+  form: { mt: 3 },
+  submitButton: { mt: 3, mb: 2 },
+  errorTypography: { variant: 'body2', color: 'error', align: 'center' },
 };
+
+export default SignIn;

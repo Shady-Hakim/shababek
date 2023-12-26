@@ -9,37 +9,14 @@ import { addTable } from '../modules/common/table';
 import Order from '../modules/common/order';
 
 const products = [
-  {
-    id: 1,
-    name: 'A',
-    price: 100,
-  },
-  {
-    id: 2,
-    name: 'B',
-    price: 200,
-  },
-  {
-    id: 3,
-    name: 'C',
-    price: 300,
-  },
-  {
-    id: 4,
-    name: 'D',
-    price: 400,
-  },
-  {
-    id: 5,
-    name: 'E',
-    price: 500,
-  },
-  {
-    id: 6,
-    name: 'F',
-    price: 600,
-  },
+  { id: 1, name: 'A', price: 100 },
+  { id: 2, name: 'B', price: 200 },
+  { id: 3, name: 'C', price: 300 },
+  { id: 4, name: 'D', price: 400 },
+  { id: 5, name: 'E', price: 500 },
+  { id: 6, name: 'F', price: 600 },
 ];
+
 const Menu = () => {
   let { tableNumber } = useParams();
   const dispatch = useDispatch();

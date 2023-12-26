@@ -4,7 +4,7 @@ import { TableCell, TableRow, TextField } from '@mui/material';
 import { changeQty, removeItem } from '../cart';
 import { Button } from '@mui/base';
 
-function ItemRow({ row }) {
+const ItemRow = ({ row }) => {
   const dispatch = useDispatch();
 
   const handleQtyChange = (event) => {
@@ -33,6 +33,6 @@ function ItemRow({ row }) {
       </TableCell>
     </TableRow>
   );
-}
+};
 
 export default ItemRow;

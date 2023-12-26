@@ -17,7 +17,7 @@ function handleSubtotal(items) {
   return items.map(({ price, qty }) => price * qty).reduce((sum, i) => sum + i, 0);
 }
 
-export default function Receipt({ setCalculations }) {
+const Receipt = ({ setCalculations }) => {
   const cartItems = useSelector((state) => state.cart.cartItems);
   const [discountRate, setDiscountRate] = useState(0);
   const taxRate = 0.14;
@@ -107,4 +107,6 @@ export default function Receipt({ setCalculations }) {
       </Table>
     </TableContainer>
   );
-}
+};
+
+export default Receipt;
