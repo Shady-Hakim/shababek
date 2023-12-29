@@ -8,7 +8,13 @@ export const productsApi = api.injectEndpoints({
         method: 'get',
       }),
     }),
+    products: builder.mutation({
+      query: (categoryId) => ({
+        url: `/v1/products?userType=admin&category=${categoryId}&isActive=true`,
+        method: 'get',
+      }),
+    }),
   }),
 });
 
-export const { useCategoriesQuery } = productsApi;
+export const { useCategoriesQuery, useProductsMutation } = productsApi;
