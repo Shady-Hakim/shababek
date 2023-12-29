@@ -1,3 +1,3 @@
-import Order from './order';
+import Products from './Products';
 
-export { Order };
+export { Products };

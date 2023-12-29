@@ -7,7 +7,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import { TextField } from '@mui/material';
-import { ItemRow } from '.';
+import ItemRow from './ItemRow';
 
 function ccyFormat(num) {
   return `${num.toFixed(2)}`;
