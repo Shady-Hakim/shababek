@@ -3,8 +3,8 @@ import { useDispatch } from 'react-redux';
 import Grid from '@mui/material/Unstable_Grid2';
 import { experimentalStyled as styled } from '@mui/material/styles';
 import { Typography, Paper, Button } from '@mui/material';
-import dish from '../assets/images/dish.png';
-import { addToCart } from '../cart';
+import dish from '../../common/assets/images/dish.png';
+import { addToCart } from '../../../modules/common/cart';
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',

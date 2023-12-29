@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Divider, Grid, Paper, TextField, Typography, Button } from '@mui/material';
 import { People, TableRestaurant } from '@mui/icons-material';
-import { Receipt } from './';
+import Receipt from './Receipt';
 
 const Order = () => {
   const tableNumber = useSelector((state) => state.table.number);

@@ -2,13 +2,13 @@ import { api } from '../../modules/app/api';
 
 export const productsApi = api.injectEndpoints({
   endpoints: (builder) => ({
-    categories: builder.query({
+    tables: builder.query({
       query: () => ({
-        url: '/v1/categories?userType=admin',
+        url: '/v1/tables?userType=admin',
         method: 'get',
       }),
     }),
   }),
 });
 
-export const { useCategoriesQuery } = productsApi;
+export const { useTablesQuery } = productsApi;

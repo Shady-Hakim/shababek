@@ -1,7 +1,7 @@
-import Tables from './Tables';
-import Products from './Products';
+import TablesPage from './Tables';
+import ProductsPage from './Products';
 import NotFound from './NotFound';
 import Orders from './Orders';
 import SignIn from './SignIn';
 
-export { Tables, Products, NotFound, Orders, SignIn };
+export { TablesPage, ProductsPage, NotFound, Orders, SignIn };
