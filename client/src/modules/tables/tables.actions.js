@@ -8,7 +8,14 @@ export const productsApi = api.injectEndpoints({
         method: 'get',
       }),
     }),
+    addTable: builder.mutation({
+      query: (table) => ({
+        url: '/v1/tables?userType=admin',
+        method: 'POST',
+        body: table,
+      }),
+    }),
   }),
 });
 
-export const { useTablesQuery } = productsApi;
+export const { useTablesQuery, useAddTableMutation } = productsApi;
