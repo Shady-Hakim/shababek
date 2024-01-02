@@ -14,7 +14,14 @@ export const productsApi = api.injectEndpoints({
         method: 'get',
       }),
     }),
+    addCategory: builder.mutation({
+      query: (category) => ({
+        url: '/v1/categories?userType=admin',
+        method: 'POST',
+        body: category,
+      }),
+    }),
   }),
 });
 
-export const { useCategoriesQuery, useProductsMutation } = productsApi;
+export const { useCategoriesQuery, useProductsMutation, useAddCategoryMutation } = productsApi;
