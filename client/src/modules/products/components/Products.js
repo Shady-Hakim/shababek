@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import Grid from '@mui/material/Unstable_Grid2';
@@ -11,7 +11,7 @@ import { useProductsMutation } from '../products.actions';
 
 const Products = () => {
   let { tableNumber } = useParams();
-  const [searchParams] = useSearchParams();
+  const [categoryId, setCategoryId] = useState();
   const dispatch = useDispatch();
   const [products, { data, isLoading, isError, error }] = useProductsMutation();
 
@@ -20,16 +20,8 @@ const Products = () => {
   }, [dispatch, tableNumber]);
 
   useEffect(() => {
-    products(searchParams.get('category'));
-  }, [products, searchParams]);
-
-  if (isLoading) {
-    return <p>Loading...</p>;
-  }
-
-  if (isError) {
-    return <p>Error: {error.message}</p>;
-  }
+    products(categoryId || '');
+  }, [categoryId, products]);
 
   return (
     <Grid container spacing={3}>
@@ -37,13 +29,17 @@ const Products = () => {
         <Typography sx={{ textAlign: 'center', fontWeight: 'bold', fontSize: 30, marginBottom: 5 }}>
           Table #{tableNumber}
         </Typography>
-        <CategoriesBar />
+        <CategoriesBar setCategoryId={setCategoryId} />
 
-        <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 1, sm: 8, md: 12 }}>
-          {data?.map((product) => (
-            <ProductItem key={product._id} product={product} />
-          ))}
-        </Grid>
+        {isLoading && <p>Loading...</p>}
+        {isError && <p>Error: {error.message}</p>}
+        {!isLoading && !isError && (
+          <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 1, sm: 8, md: 12 }}>
+            {data?.map((product) => (
+              <ProductItem key={product._id} product={product} />
+            ))}
+          </Grid>
+        )}
       </Grid>
       <Grid item xs={12} md={4} lg={4}>
         <Order />

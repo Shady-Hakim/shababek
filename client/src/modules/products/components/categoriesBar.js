@@ -1,18 +1,16 @@
 import React, { useState } from 'react';
 import Grid from '@mui/material/Unstable_Grid2';
 import { Box, Tabs, tabsClasses, Tab, CircularProgress, Alert } from '@mui/material';
-import { useSearchParams } from 'react-router-dom';
 import { useCategoriesQuery } from '../products.actions';
 
-function CategoriesBar() {
+function CategoriesBar({ setCategoryId }) {
   const [value, setValue] = useState(0);
-  const [, setSearchParams] = useSearchParams();
   const { data, isLoading, isError, error } = useCategoriesQuery();
 
   const handleChange = (event, newValue) => {
     if (!isLoading && !isError) {
       const selectedCategory = data[newValue];
-      setSearchParams({ category: selectedCategory._id });
+      setCategoryId(selectedCategory._id || data[0]._id);
       setValue(newValue);
     }
   };
