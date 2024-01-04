@@ -1,11 +1,25 @@
-import React from 'react';
-import Grid from '@mui/material/Unstable_Grid2';
+import React, { useState } from 'react';
+import { CircularProgress, Alert, Grid } from '@mui/material';
 import TableItem from './TableItem';
 import { useTablesQuery } from '../tables.actions';
-import { CircularProgress, Alert } from '@mui/material';
+import AddTableDialog from './addTableDialog';
+import AddTableButton from './AddTableButton';
+import { useSelector } from 'react-redux';
 
 const TablesPage = () => {
   const { data, isLoading, isError, error } = useTablesQuery();
+  const [openModal, setOpenModal] = useState(false);
+  const { admin } = useSelector((state) => state.authentication);
+  const adminRoles = ['Admin', 'Super Admin'];
+  const isAdmin = adminRoles.includes(admin.role);
+
+  const handleAddTable = () => {
+    setOpenModal(true);
+  };
+
+  const handleModalClose = () => {
+    setOpenModal(false);
+  };
 
   if (isLoading) {
     return (
@@ -26,8 +40,16 @@ const TablesPage = () => {
   return (
     <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
       {data?.map((table, index) => (
-        <TableItem table={table} key={index} />
+        <Grid item key={index} xs={12} sm={6} md={4} lg={3}>
+          <TableItem table={table} />
+        </Grid>
       ))}
+      {isAdmin && (
+        <>
+          <AddTableButton handleAddTable={handleAddTable} />
+          <AddTableDialog open={openModal} onClose={handleModalClose} />
+        </>
+      )}
     </Grid>
   );
 };

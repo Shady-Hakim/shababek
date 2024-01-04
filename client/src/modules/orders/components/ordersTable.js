@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useState } from 'react';
 import {
   TableRow,
   TablePagination,
@@ -9,58 +9,58 @@ import {
   Table,
   Paper,
 } from '@mui/material';
+import { useOrdersQuery } from '../order.actions';
 
 const columns = [
   { id: 'orderNumber', label: 'Order number', minWidth: 170 },
-  { id: 'total', label: 'Total', minWidth: 100 },
   {
     id: 'table',
     label: 'Table',
-    minWidth: 170,
+    minWidth: 100,
     align: 'right',
     format: (value) => value.toLocaleString('en-US'),
   },
+  { id: 'user', label: 'User', minWidth: 100 },
+  { id: 'createdDate', label: 'Created date', minWidth: 100 },
+  { id: 'statue', label: 'Statues', minWidth: 100 },
+  { id: 'total', label: 'Total', minWidth: 100 },
+
   {
     id: 'edit',
     label: 'Edit',
-    minWidth: 170,
+    minWidth: 100,
     align: 'right',
     format: (value) => value.toLocaleString('en-US'),
   },
   {
     id: 'pay',
     label: 'Pay',
-    minWidth: 170,
+    minWidth: 100,
     align: 'right',
     format: (value) => value.toFixed(2),
   },
 ];
 
-function createData(orderNumber, total, table, edit, pay) {
-  return { orderNumber, total, table, edit, pay };
+function createData(orderNumber, table, user, createdDate, statue, total, edit, pay) {
+  return { orderNumber, table, user, createdDate, statue, total, edit, pay };
 }
 
-const rows = [
-  createData('1234', '200 LE', 1, 'Edit', 'Pay'),
-  createData('1234', '200 LE', 1, 'Edit', 'Pay'),
-  createData('1234', '200 LE', 1, 'Edit', 'Pay'),
-  createData('1234', '200 LE', 1, 'Edit', 'Pay'),
-  createData('1234', '200 LE', 1, 'Edit', 'Pay'),
-  createData('1234', '200 LE', 1, 'Edit', 'Pay'),
-  createData('1234', '200 LE', 1, 'Edit', 'Pay'),
-  createData('1234', '200 LE', 1, 'Edit', 'Pay'),
-  createData('1234', '200 LE', 1, 'Edit', 'Pay'),
-  createData('1234', '200 LE', 1, 'Edit', 'Pay'),
-  createData('1234', '200 LE', 1, 'Edit', 'Pay'),
-  createData('1234', '200 LE', 1, 'Edit', 'Pay'),
-  createData('1234', '200 LE', 1, 'Edit', 'Pay'),
-  createData('1234', '200 LE', 1, 'Edit', 'Pay'),
-  createData('1234', '200 LE', 1, 'Edit', 'Pay'),
-];
-
 export default function StickyHeadTable() {
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const { data, isLoading, isError, error } = useOrdersQuery();
+  console.log(data);
+  const rows = data.map((order) =>
+    createData(
+      order._id,
+      order.table.name,
+      order.admin.firstName + ' ' + order.admin.lastName,
+      new Date(order.createdAt).toLocaleString(),
+      order.status,
+      'Edit',
+      'Pay'
+    )
+  );
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -78,7 +78,7 @@ export default function StickyHeadTable() {
           <TableHead>
             <TableRow>
               {columns.map((column) => (
-                <TableCell key={column.id} align={column.align} style={{ minWidth: column.minWidth }}>
+                <TableCell key={column.id} align={'left'} style={{ minWidth: column.minWidth }}>
                   {column.label}
                 </TableCell>
               ))}
@@ -91,7 +91,7 @@ export default function StickyHeadTable() {
                   {columns.map((column) => {
                     const value = row[column.id];
                     return (
-                      <TableCell key={column.id} align={column.align}>
+                      <TableCell key={column.id} align={'left'}>
                         {column.format && typeof value === 'number' ? column.format(value) : value}
                       </TableCell>
                     );
