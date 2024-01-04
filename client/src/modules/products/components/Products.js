@@ -65,7 +65,6 @@ const Products = () => {
       <Grid item xs={12} md={4} lg={4}>
         <Order />
       </Grid>
-
       {isAdmin && (
         <>
           <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
