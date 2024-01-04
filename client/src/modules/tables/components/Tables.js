@@ -37,31 +37,6 @@ const TablesPage = () => {
     );
   }
 
-  const handleAddTable = () => {
-    setOpenModal(true);
-  };
-
-  const handleModalClose = () => {
-    setOpenModal(false);
-  };
-
-  const boxStyle = {
-    border: '1px solid #ccc',
-    borderRadius: '8px',
-    padding: '16px',
-    textAlign: 'center',
-    cursor: 'pointer',
-    height: '100%',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-  };
-
-  const iconStyle = {
-    fontSize: '48px',
-  };
-
   return (
     <Grid container spacing={2} columns={{ xs: 4, sm: 8, md: 12 }}>
       {data?.map((table, index) => (

@@ -39,7 +39,7 @@ const AddTableDialog = ({ open, onClose }) => {
 
   return (
     <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleAddTable}>
-      {({ isSubmitting, errors, touched, setTouched }) => (
+      {({ isSubmitting, errors, touched, submitForm }) => (
         <Form>
           <Dialog open={open} onClose={onClose}>
             <DialogTitle>Add Table</DialogTitle>
@@ -60,7 +60,7 @@ const AddTableDialog = ({ open, onClose }) => {
               <Button onClick={onClose} color='primary'>
                 Cancel
               </Button>
-              <Button type='submit' color='primary' disabled={isSubmitting} onClick={() => setTouched({ name: true })}>
+              <Button type='button' color='primary' disabled={isSubmitting} onClick={submitForm}>
                 Add
               </Button>
             </DialogActions>
