@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Grid, Typography, Button, CircularProgress } from '@mui/material';
 import CategoriesBar from './categoriesBar';
 import Order from '../../orders/components/OrderDetails';
@@ -15,6 +15,9 @@ const Products = () => {
   const [openModal, setOpenModal] = useState(false);
   const dispatch = useDispatch();
   const [products, { data, isLoading, isError, error }] = useProductsMutation();
+  const { admin } = useSelector((state) => state.authentication);
+  const adminRoles = ['Admin', 'Super Admin'];
+  const isAdmin = adminRoles.includes(admin.role);
 
   useEffect(() => {
     dispatch(addTable(tableNumber));
@@ -43,7 +46,6 @@ const Products = () => {
 
         {isLoading && (
           <Grid container justifyContent='center' alignItems='center' height='200px'>
-            {/* Use CircularProgress for loading spinner */}
             <CircularProgress size={40} />
           </Grid>
         )}
@@ -63,17 +65,19 @@ const Products = () => {
       <Grid item xs={12} md={4} lg={4}>
         <Order />
       </Grid>
-
-      <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-        <Button variant='contained' color='primary' onClick={handleAddCategory} sx={{ mr: 2 }}>
-          Add Category
-        </Button>
-        <Button variant='contained' color='primary' onClick={() => {}}>
-          Add Product
-        </Button>
-      </Grid>
-
-      <AddCategoryDialog open={openModal} onClose={handleModalClose} />
+      {isAdmin && (
+        <>
+          <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+            <Button variant='contained' color='primary' onClick={handleAddCategory} sx={{ mr: 2 }}>
+              Add Category
+            </Button>
+            <Button variant='contained' color='primary' onClick={() => {}}>
+              Add Product
+            </Button>
+          </Grid>
+          <AddCategoryDialog open={openModal} onClose={handleModalClose} />
+        </>
+      )}
     </Grid>
   );
 };

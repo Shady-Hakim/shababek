@@ -1,8 +1,7 @@
 import React from 'react';
 import Grid from '@mui/material/Unstable_Grid2';
 import { Typography } from '@mui/material';
-import { OrderDetails } from '../modules/orders/components';
-import OrdersTable from '../modules/common/components/ordersTable';
+import { OrderDetails, OrdersTable } from '../modules/orders/components';
 
 const Orders = () => {
   return (

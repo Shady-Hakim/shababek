@@ -1,14 +1,25 @@
 import React, { useState } from 'react';
-import Grid from '@mui/material/Grid';
+import { CircularProgress, Alert, Grid } from '@mui/material';
 import TableItem from './TableItem';
 import { useTablesQuery } from '../tables.actions';
-import { CircularProgress, Alert, Box, IconButton, Typography } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
 import AddTableDialog from './addTableDialog';
+import AddTableButton from './AddTableButton';
+import { useSelector } from 'react-redux';
 
 const TablesPage = () => {
   const { data, isLoading, isError, error } = useTablesQuery();
   const [openModal, setOpenModal] = useState(false);
+  const { admin } = useSelector((state) => state.authentication);
+  const adminRoles = ['Admin', 'Super Admin'];
+  const isAdmin = adminRoles.includes(admin.role);
+
+  const handleAddTable = () => {
+    setOpenModal(true);
+  };
+
+  const handleModalClose = () => {
+    setOpenModal(false);
+  };
 
   if (isLoading) {
     return (
@@ -58,17 +69,12 @@ const TablesPage = () => {
           <TableItem table={table} />
         </Grid>
       ))}
-      <Grid item xs={12} sm={6} md={4} lg={3}>
-        <Box sx={boxStyle} onClick={handleAddTable}>
-          <IconButton color='primary' aria-label='add table' sx={iconStyle}>
-            <AddIcon />
-          </IconButton>
-          <Typography variant='subtitle1' sx={{ marginTop: '8px' }}>
-            Add New Table
-          </Typography>
-        </Box>
-      </Grid>
-      <AddTableDialog open={openModal} onClose={handleModalClose} />
+      {isAdmin && (
+        <>
+          <AddTableButton handleAddTable={handleAddTable} />
+          <AddTableDialog open={openModal} onClose={handleModalClose} />
+        </>
+      )}
     </Grid>
   );
 };
