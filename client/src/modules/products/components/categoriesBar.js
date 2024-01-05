@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Grid from '@mui/material/Unstable_Grid2';
 import { Box, Tabs, tabsClasses, Tab, CircularProgress, Alert } from '@mui/material';
 import { useCategoriesQuery } from '../products.actions';
@@ -7,10 +7,14 @@ function CategoriesBar({ setCategoryId }) {
   const [value, setValue] = useState(0);
   const { data, isLoading, isError, error } = useCategoriesQuery();
 
+  useEffect(() => {
+    setCategoryId(data && data[0]._id);
+  }, [data, setCategoryId]);
+
   const handleChange = (event, newValue) => {
     if (!isLoading && !isError) {
       const selectedCategory = data[newValue];
-      setCategoryId(selectedCategory._id || data[0]._id);
+      setCategoryId(selectedCategory._id);
       setValue(newValue);
     }
   };

@@ -1,29 +1,32 @@
 import React from 'react';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button } from '@mui/material';
-import { useAddCategoryMutation } from '../products.actions';
+import { useAddProductMutation } from '../products.actions';
 import * as Yup from 'yup';
 
 const validationSchema = Yup.object().shape({
-  name: Yup.string().required('Category name is required'),
-  description: Yup.string().required('Category description is required'),
+  name: Yup.string().required('Product name is required'),
+  description: Yup.string().required('Product description is required'),
+  price: Yup.number().required('Price is required').positive('Price must be positive'),
 });
 
-const AddCategoryDialog = ({ open, onClose }) => {
-  const [addCategory, { isSuccess, isError, error }] = useAddCategoryMutation();
+const AddProductDialog = ({ open, onClose, categoryId }) => {
+  const [addProduct, { isSuccess, isError, error }] = useAddProductMutation();
 
   const initialValues = {
     name: '',
     description: '',
+    price: '',
   };
 
-  const handleAddCategory = async (values, { resetForm, setFieldError, setSubmitting }) => {
+  const handleAddProduct = async (values, { resetForm, setFieldError, setSubmitting }) => {
+    console.log({ ...values, category: categoryId });
     try {
       await validationSchema.validate(values, { abortEarly: false });
 
-      const { data } = await addCategory(values);
+      const { data } = await addProduct({ ...values, category: categoryId });
 
-      console.log('Category added successfully:', data);
+      console.log('Product added successfully:', data);
 
       resetForm();
     } catch (validationError) {
@@ -38,11 +41,11 @@ const AddCategoryDialog = ({ open, onClose }) => {
   };
 
   return (
-    <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleAddCategory}>
+    <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleAddProduct}>
       {({ isSubmitting, errors, touched, submitForm }) => (
         <Form>
           <Dialog open={open} onClose={onClose}>
-            <DialogTitle>Add Category</DialogTitle>
+            <DialogTitle>Add Product</DialogTitle>
             <DialogContent>
               <Field
                 as={TextField}
@@ -62,8 +65,18 @@ const AddCategoryDialog = ({ open, onClose }) => {
                 error={touched.description && errors.description}
                 helperText={<ErrorMessage name='description' />}
               />
+              <Field
+                as={TextField}
+                label='Price'
+                name='price'
+                type='number'
+                fullWidth
+                margin='normal'
+                error={touched.price && errors.price}
+                helperText={<ErrorMessage name='price' />}
+              />
               {isError && <div style={{ color: 'red', marginTop: '8px' }}>{error}</div>}
-              {isSuccess && <div style={{ color: 'green', marginTop: '8px' }}>Category added successfully</div>}
+              {isSuccess && <div style={{ color: 'green', marginTop: '8px' }}>Product added successfully</div>}
             </DialogContent>
             <DialogActions>
               <Button onClick={onClose} color='primary'>
@@ -80,4 +93,4 @@ const AddCategoryDialog = ({ open, onClose }) => {
   );
 };
 
-export default AddCategoryDialog;
+export default AddProductDialog;

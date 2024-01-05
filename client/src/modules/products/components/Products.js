@@ -8,11 +8,13 @@ import ProductItem from './productItem';
 import { useProductsMutation } from '../products.actions';
 import { addTable } from '../../common/table';
 import AddCategoryDialog from './addCategoryDialog';
+import AddProductDialog from './addProductDialog';
 
 const Products = () => {
   let { tableNumber } = useParams();
   const [categoryId, setCategoryId] = useState();
   const [openModal, setOpenModal] = useState(false);
+  const [openProductModal, setOpenProductModal] = useState(false);
   const dispatch = useDispatch();
   const [products, { data, isLoading, isError, error }] = useProductsMutation();
   const { admin } = useSelector((state) => state.authentication);
@@ -26,14 +28,6 @@ const Products = () => {
   useEffect(() => {
     products(categoryId || '');
   }, [categoryId, products]);
-
-  const handleAddCategory = () => {
-    setOpenModal(true);
-  };
-
-  const handleModalClose = () => {
-    setOpenModal(false);
-  };
 
   return (
     <Grid container spacing={3}>
@@ -50,15 +44,15 @@ const Products = () => {
           </Grid>
         )}
         {isError && <p>Error: {error.message}</p>}
-        {!isLoading && !isError && data && data.length > 0 ? (
+        {!isLoading && !isError && data?.length > 0 ? (
           <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 1, sm: 8, md: 12 }}>
-            {data.map((product) => (
+            {data?.map((product) => (
               <ProductItem key={product._id} product={product} />
             ))}
           </Grid>
         ) : (
           <Typography variant='h6' sx={{ textAlign: 'center', marginTop: 2 }}>
-            {data && data.length === 0 ? 'No products available' : ''}
+            {data?.length === 0 ? 'No products available' : ''}
           </Typography>
         )}
       </Grid>
@@ -68,14 +62,19 @@ const Products = () => {
       {isAdmin && (
         <>
           <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-            <Button variant='contained' color='primary' onClick={handleAddCategory} sx={{ mr: 2 }}>
+            <Button variant='contained' color='primary' onClick={() => setOpenModal(true)} sx={{ mr: 2 }}>
               Add Category
             </Button>
-            <Button variant='contained' color='primary' onClick={() => {}}>
+            <Button variant='contained' color='primary' onClick={() => setOpenProductModal(true)}>
               Add Product
             </Button>
           </Grid>
-          <AddCategoryDialog open={openModal} onClose={handleModalClose} />
+          <AddCategoryDialog open={openModal} onClose={() => setOpenModal(false)} />
+          <AddProductDialog
+            open={openProductModal}
+            onClose={() => setOpenProductModal(false)}
+            categoryId={categoryId}
+          />
         </>
       )}
     </Grid>
