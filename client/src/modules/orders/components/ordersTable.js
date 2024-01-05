@@ -49,14 +49,15 @@ export default function StickyHeadTable() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const { data, isLoading, isError, error } = useOrdersQuery();
-  console.log(data);
-  const rows = data.map((order) =>
+
+  const rows = data?.map((order) =>
     createData(
       order._id,
       order.table.name,
       order.admin.firstName + ' ' + order.admin.lastName,
       new Date(order.createdAt).toLocaleString(),
       order.status,
+      'Total',
       'Edit',
       'Pay'
     )
@@ -85,7 +86,7 @@ export default function StickyHeadTable() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
+            {rows?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
               return (
                 <TableRow hover role='checkbox' tabIndex={-1} key={row.code}>
                   {columns.map((column) => {
@@ -105,7 +106,7 @@ export default function StickyHeadTable() {
       <TablePagination
         rowsPerPageOptions={[10, 25, 100]}
         component='div'
-        count={rows.length}
+        count={rows?.length}
         rowsPerPage={rowsPerPage}
         page={page}
         onPageChange={handleChangePage}
