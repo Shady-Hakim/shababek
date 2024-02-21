@@ -483,13 +483,11 @@ router.delete('/:id', auth(['admin']), async (req, res) => {
         break;
     }
 
-    const table = await Table.findOne(match);
+    const table = await Table.findOneAndDelete(match);
 
     if (!table) {
       throw error;
     }
-
-    await table.remove();
 
     res.json();
   } catch (error) {
