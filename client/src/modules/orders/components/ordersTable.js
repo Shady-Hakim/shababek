@@ -53,7 +53,7 @@ export default function StickyHeadTable() {
   const rows = data?.map((order) =>
     createData(
       order._id,
-      order.table.name,
+      order.table?.name,
       order.admin.firstName + ' ' + order.admin.lastName,
       new Date(order.createdAt).toLocaleString(),
       order.status,
