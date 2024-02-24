@@ -23,7 +23,7 @@ const Products = () => {
   const adminRoles = ['Admin', 'Super Admin'];
   const isAdmin = adminRoles.includes(admin.role);
   const currentTable = tablesData?.find((table) => table._id === tableId);
-  console.log({ currentTable });
+
   useEffect(() => {
     dispatch(addTable(currentTable));
   }, [dispatch, currentTable]);
