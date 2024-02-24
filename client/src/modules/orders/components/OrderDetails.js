@@ -1,16 +1,50 @@
-import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
-import { Divider, Grid, Paper, TextField, Typography, Button } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Divider, Grid, Paper, TextField, Typography, Button, Dialog, DialogContent } from '@mui/material';
 import { People, TableRestaurant } from '@mui/icons-material';
 import Receipt from './Receipt';
+import { useAddOrderMutation } from '../order.actions';
+import { clearCart } from '../../common/cart';
+import { useParams } from 'react-router-dom';
 
 const Order = () => {
-  const tableNumber = useSelector((state) => state.table.number);
+  const { table } = useSelector((state) => state.table);
+  let { tableId } = useParams();
   const cartItems = useSelector((state) => state.cart.cartItems);
-  const [calculations, setCalculations] = useState();
+  const [addOrder, { isSuccess, isError }] = useAddOrderMutation();
+  const [rates, setRates] = useState();
+  const [openDialog, setOpenDialog] = useState(false);
   const [guests, setGuests] = useState();
+  const dispatch = useDispatch();
 
-  const order = { guests, cartItems, tableNumber: tableNumber, ...calculations };
+  const products = cartItems.map((product) => ({
+    product: product._id,
+    price: product.price,
+    count: product.qty,
+  }));
+
+  const order = {
+    table: tableId,
+    status: 'Ordered',
+    paymentType: 'Cash',
+    guests,
+    products,
+    ...rates,
+  };
+
+  const createOrder = async (order) => {
+    await addOrder(order);
+    setOpenDialog(true);
+
+    setTimeout(() => {
+      setOpenDialog(false);
+    }, 2000);
+  };
+
+  useEffect(() => {
+    if (isSuccess) dispatch(clearCart());
+  }, [dispatch, isSuccess]);
+
   return (
     <Paper
       sx={{
@@ -27,7 +61,7 @@ const Order = () => {
         <Grid item xs={8} display={'flex'}>
           <TableRestaurant />
           <Typography display={'inline'} ml={1}>
-            Table:{tableNumber}
+            Table:{table?.name}
           </Typography>
         </Grid>
       </Grid>
@@ -50,13 +84,28 @@ const Order = () => {
         />
       </Grid>
       <Divider />
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+        <DialogContent>
+          {isError && <div style={{ color: 'red', marginTop: '8px' }}>Error creating order</div>}
+          {isSuccess && <div style={{ color: 'green', marginTop: '8px' }}>Order successful</div>}
+        </DialogContent>
+      </Dialog>
       {!!cartItems.length && (
         <>
-          <Receipt setCalculations={setCalculations} />
+          <Receipt setRates={setRates} />
           <Divider />
-          <Button onClick={() => console.log({ order })} variant='contained' sx={{ mr: 2, mt: 2 }} fullWidth>
-            Save
-          </Button>
+          <Grid container spacing={2}>
+            <Grid item xs={6}>
+              <Button onClick={() => createOrder(order)} variant='contained' sx={{ mt: 2 }} fullWidth>
+                Save
+              </Button>
+            </Grid>
+            <Grid item xs={6}>
+              <Button onClick={() => dispatch(clearCart())} variant='outlined' sx={{ mt: 2 }} fullWidth>
+                Cancel
+              </Button>
+            </Grid>
+          </Grid>
         </>
       )}
     </Paper>

@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-  number: null,
+  table: null,
 };
 
 const {
@@ -12,7 +12,7 @@ const {
   initialState,
   reducers: {
     addTable: (state, { payload }) => {
-      state.number = payload;
+      state.table = payload;
     },
   },
 });

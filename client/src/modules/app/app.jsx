@@ -83,7 +83,7 @@ const App = () => {
               }
             />
             <Route
-              path='/tables/:tableNumber'
+              path='/tables/:tableId'
               element={
                 <PrivateOutlet>
                   <ProductsPage />

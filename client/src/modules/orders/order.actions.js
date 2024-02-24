@@ -8,7 +8,14 @@ export const ordersApi = api.injectEndpoints({
         method: 'get',
       }),
     }),
+    addOrder: builder.mutation({
+      query: (body) => ({
+        url: '/v1/orders?userType=admin',
+        method: 'post',
+        body,
+      }),
+    }),
   }),
 });
 
-export const { useOrdersQuery } = ordersApi;
+export const { useOrdersQuery, useAddOrderMutation } = ordersApi;

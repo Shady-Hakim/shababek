@@ -6,7 +6,7 @@ const initialState = {
 
 const {
   reducer,
-  actions: { addToCart, changeQty, removeItem },
+  actions: { addToCart, changeQty, removeItem, clearCart },
 } = createSlice({
   name: 'cart',
   initialState,
@@ -14,9 +14,9 @@ const {
     addToCart: (state, { payload }) => {
       if (!state.cartItems.length) state.cartItems.push({ ...payload, qty: 1 });
       else
-        state.cartItems = state.cartItems.some((product) => product.id === payload.id)
+        state.cartItems = state.cartItems.some((product) => product.id === payload._id)
           ? state.cartItems.map((product) =>
-              product.id === payload.id ? { ...product, qty: product.qty + 1 } : product
+              product.id === payload._id ? { ...product, qty: product.qty + 1 } : product
             )
           : [...state.cartItems, { ...payload, qty: 1 }];
     },
@@ -28,9 +28,12 @@ const {
     removeItem: (state, { payload }) => {
       state.cartItems = state.cartItems.filter((item) => item.id !== payload);
     },
+    clearCart: (state) => {
+      state.cartItems = [];
+    },
   },
 });
 
-export { addToCart, changeQty, removeItem };
+export { addToCart, changeQty, removeItem, clearCart };
 
 export default reducer;

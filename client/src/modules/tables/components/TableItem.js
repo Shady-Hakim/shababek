@@ -70,7 +70,7 @@ function TableItem({ table, refetchTables }) {
         <RemoveButton color='error' onClick={handleRemove}>
           X
         </RemoveButton>
-        <Box onClick={() => navigation(`/tables/${table.name}`)}>
+        <Box onClick={() => navigation(`/tables/${table._id}`)}>
           <img src={tableImg} alt={'table'} loading='lazy' />
           <ContentWrapper>
             <Typography>{table.name}</Typography>

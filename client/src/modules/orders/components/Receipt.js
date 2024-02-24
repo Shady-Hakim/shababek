@@ -17,7 +17,7 @@ function handleSubtotal(items) {
   return items.map(({ price, qty }) => price * qty).reduce((sum, i) => sum + i, 0);
 }
 
-const Receipt = ({ setCalculations }) => {
+const Receipt = ({ setRates }) => {
   const cartItems = useSelector((state) => state.cart.cartItems);
   const [discountRate, setDiscountRate] = useState(0);
   const taxRate = 0.14;
@@ -31,22 +31,12 @@ const Receipt = ({ setCalculations }) => {
   const invoiceTotal = totalWithTaxesAndService - discountAmount;
 
   useEffect(() => {
-    setCalculations({
-      rates: { taxRate, serviceRate, discountRate },
-      totals: { subtotal, totalWithTaxesAndService, invoiceTotal },
-      amounts: { taxesAmount, serviceAmount, discountAmount },
+    setRates({
+      taxes: taxRate,
+      service: serviceRate,
+      discount: discountRate,
     });
-  }, [
-    discountAmount,
-    discountRate,
-    invoiceTotal,
-    serviceAmount,
-    setCalculations,
-    subtotal,
-    taxRate,
-    taxesAmount,
-    totalWithTaxesAndService,
-  ]);
+  }, [discountRate, setRates, taxRate]);
 
   return (
     <TableContainer>

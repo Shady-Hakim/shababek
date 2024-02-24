@@ -8,6 +8,12 @@ export const productsApi = api.injectEndpoints({
         method: 'get',
       }),
     }),
+    tableById: builder.mutation({
+      query: (tableId) => ({
+        url: `/v1/tables/${tableId}?userType=admin`,
+        method: 'get',
+      }),
+    }),
     removeTable: builder.mutation({
       query: (tableId) => ({
         url: `/v1/tables/${tableId}?userType=admin`,
@@ -24,4 +30,4 @@ export const productsApi = api.injectEndpoints({
   }),
 });
 
-export const { useTablesQuery, useAddTableMutation, useRemoveTableMutation } = productsApi;
+export const { useTablesQuery, useAddTableMutation, useRemoveTableMutation, useTableByIdMutation } = productsApi;
