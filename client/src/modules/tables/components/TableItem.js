@@ -12,9 +12,8 @@ import {
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { experimentalStyled as styled } from '@mui/material/styles';
-
 import tableImg from '../../common/assets/images/table.png';
-import { useRemoveTableMutation, useTablesQuery } from '../tables.actions';
+import { useRemoveTableMutation } from '../tables.actions';
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
@@ -41,8 +40,7 @@ const ContentWrapper = styled(Box)(({ theme }) => ({
 }));
 
 function TableItem({ table, refetchTables }) {
-  const [removeTable, { isSuccess: isRemoveSuccess, isError: isRemoveError, error: removeError }] =
-    useRemoveTableMutation();
+  const [removeTable, { isSuccess: isRemoveSuccess }] = useRemoveTableMutation();
   const navigation = useNavigate();
   const [isConfirmationOpen, setConfirmationOpen] = useState(false);
 

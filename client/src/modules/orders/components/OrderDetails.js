@@ -7,9 +7,7 @@ import { useAddOrderMutation } from '../order.actions';
 import { clearCart } from '../../common/cart';
 import { useParams } from 'react-router-dom';
 
-const Order = () => {
-  const { table } = useSelector((state) => state.table);
-  let { tableId } = useParams();
+const Order = ({ table }) => {
   const cartItems = useSelector((state) => state.cart.cartItems);
   const [addOrder, { isSuccess, isError }] = useAddOrderMutation();
   const [rates, setRates] = useState();
@@ -24,7 +22,7 @@ const Order = () => {
   }));
 
   const order = {
-    table: tableId,
+    table: table._id,
     status: 'Ordered',
     paymentType: 'Cash',
     guests,

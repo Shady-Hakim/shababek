@@ -16,17 +16,12 @@ const Products = () => {
   const [categoryId, setCategoryId] = useState();
   const [openModal, setOpenModal] = useState(false);
   const [openProductModal, setOpenProductModal] = useState(false);
-  const dispatch = useDispatch();
   const [products, { data, isLoading, isError, error }] = useProductsMutation();
   const { data: tablesData } = useTablesQuery();
   const { admin } = useSelector((state) => state.authentication);
   const adminRoles = ['Admin', 'Super Admin'];
   const isAdmin = adminRoles.includes(admin.role);
   const currentTable = tablesData?.find((table) => table._id === tableId);
-
-  useEffect(() => {
-    dispatch(addTable(currentTable));
-  }, [dispatch, currentTable]);
 
   useEffect(() => {
     products(categoryId || '');
@@ -60,7 +55,7 @@ const Products = () => {
         )}
       </Grid>
       <Grid item xs={12} md={4} lg={4}>
-        <Order />
+        <Order table={currentTable} />
       </Grid>
       {isAdmin && (
         <>
