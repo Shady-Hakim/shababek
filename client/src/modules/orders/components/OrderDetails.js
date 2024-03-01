@@ -18,13 +18,11 @@ const Order = ({ table }) => {
   const products = cartItems.map((product) => ({
     product: product._id,
     price: product.price,
-    count: product.qty,
+    count: product.count,
   }));
 
   const order = {
     table: table._id,
-    status: 'Ordered',
-    paymentType: 'Cash',
     guests,
     products,
     ...rates,

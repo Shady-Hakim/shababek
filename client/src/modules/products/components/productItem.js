@@ -30,7 +30,7 @@ function ProductItem({ product }) {
   return (
     <Grid item xs={12} sm={6} md={4} lg={3}>
       <ProductPaper elevation={3}>
-        <ProductImage src={product.imageUrl} width={200} alt={product.name} loading='lazy' />
+        {product.imageUrl && <ProductImage src={product.imageUrl} width={200} alt={product.name} loading='lazy' />}
         <Typography variant='h6' mt={2} mb={1}>
           {product.name}
         </Typography>

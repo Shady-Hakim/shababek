@@ -8,15 +8,15 @@ const ItemRow = ({ row }) => {
   const dispatch = useDispatch();
 
   const handleQtyChange = (event) => {
-    dispatch(changeQty({ ...row, qty: +event.target.value }));
+    dispatch(changeQty({ ...row, count: +event.target.value }));
   };
   return (
     <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
       <TableCell>{row.name}</TableCell>
       <TableCell align='right'>
         <TextField
-          error={row.qty < 1}
-          value={row.qty}
+          error={row.count < 1}
+          value={row.count}
           id='outlined-number'
           type='number'
           InputLabelProps={{
@@ -27,9 +27,9 @@ const ItemRow = ({ row }) => {
           onChange={handleQtyChange}
         />
       </TableCell>
-      <TableCell align='right'>{row.price * row.qty} LE</TableCell>
+      <TableCell align='right'>{row.price * row.count} LE</TableCell>
       <TableCell align='right'>
-        <Button onClick={() => dispatch(removeItem(row.id))}>x</Button>
+        <Button onClick={() => dispatch(removeItem(row._id))}>x</Button>
       </TableCell>
     </TableRow>
   );
