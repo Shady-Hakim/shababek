@@ -8,27 +8,13 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import { TextField } from '@mui/material';
 import ItemRow from './ItemRow';
-
-function ccyFormat(num) {
-  return `${num.toFixed(2)}`;
-}
-
-function handleSubtotal(items) {
-  return items.map(({ price, qty }) => price * qty).reduce((sum, i) => sum + i, 0);
-}
+import { ccyFormat, invoiceTotal, serviceAmount, subtotal, taxesAmount } from '../../common/functions';
 
 const Receipt = ({ setRates }) => {
   const cartItems = useSelector((state) => state.cart.cartItems);
   const [discountRate, setDiscountRate] = useState(0);
   const taxRate = 0.14;
   const serviceRate = 0.12;
-
-  const subtotal = handleSubtotal(cartItems);
-  const taxesAmount = taxRate * subtotal;
-  const serviceAmount = serviceRate * subtotal;
-  const totalWithTaxesAndService = taxesAmount + serviceAmount + subtotal;
-  const discountAmount = (discountRate / 100) * totalWithTaxesAndService;
-  const invoiceTotal = totalWithTaxesAndService - discountAmount;
 
   useEffect(() => {
     setRates({
@@ -56,18 +42,18 @@ const Receipt = ({ setRates }) => {
           <TableRow>
             <TableCell rowSpan={5} />
             <TableCell colSpan={2}>Subtotal</TableCell>
-            <TableCell align='right'>{ccyFormat(subtotal)} LE</TableCell>
+            <TableCell align='right'>{ccyFormat(subtotal(cartItems))} LE</TableCell>
           </TableRow>
           <TableRow>
             <TableCell>Tax 14%</TableCell>
             <TableCell colSpan={2} align='right'>
-              {ccyFormat(taxesAmount)} LE
+              {ccyFormat(taxesAmount(taxRate, cartItems))} LE
             </TableCell>
           </TableRow>
           <TableRow>
             <TableCell>Service 12%</TableCell>
             <TableCell colSpan={2} align='right'>
-              {ccyFormat(serviceAmount)} LE
+              {ccyFormat(serviceAmount(serviceRate, cartItems))} LE
             </TableCell>
           </TableRow>
           <TableRow>
@@ -90,7 +76,7 @@ const Receipt = ({ setRates }) => {
           <TableRow>
             <TableCell>Total</TableCell>
             <TableCell colSpan={2} align='right'>
-              {ccyFormat(invoiceTotal)} LE
+              {ccyFormat(invoiceTotal(discountRate, taxRate, serviceRate, cartItems))} LE
             </TableCell>
           </TableRow>
         </TableBody>

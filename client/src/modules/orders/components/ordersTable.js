@@ -8,11 +8,17 @@ import {
   TableBody,
   Table,
   Paper,
+  Tabs,
+  Tab,
+  Box,
+  CircularProgress,
+  Button,
 } from '@mui/material';
 import { useOrdersQuery } from '../order.actions';
+import { ccyFormat, invoiceTotal } from '../../common/functions';
+import PaymentDialog from './PaymentDialog';
 
 const columns = [
-  { id: 'orderNumber', label: 'Order number', minWidth: 170 },
   {
     id: 'table',
     label: 'Table',
@@ -24,7 +30,6 @@ const columns = [
   { id: 'createdDate', label: 'Created date', minWidth: 100 },
   { id: 'statue', label: 'Statues', minWidth: 100 },
   { id: 'total', label: 'Total', minWidth: 100 },
-
   {
     id: 'edit',
     label: 'Edit',
@@ -41,25 +46,65 @@ const columns = [
   },
 ];
 
-function createData(orderNumber, table, user, createdDate, statue, total, edit, pay) {
-  return { orderNumber, table, user, createdDate, statue, total, edit, pay };
+function createData(table, user, createdDate, statue, total, edit, pay) {
+  return { table, user, createdDate, statue, total, edit, pay };
 }
+
+const filterOrders = (orders, status) => {
+  return orders?.filter((order) => order.status === status);
+};
 
 export default function StickyHeadTable() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const { data, isLoading, isError, error } = useOrdersQuery();
+  const [selectedTab, setSelectedTab] = useState(0);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [paymentChoice, setPaymentChoice] = useState('');
 
-  const rows = data?.map((order) =>
+  const { data, isLoading, isError, error } = useOrdersQuery();
+  const orderedOrders = filterOrders(data, 'Ordered');
+  const paidOrders = filterOrders(data, 'Paid');
+  const cancelledOrders = filterOrders(data, 'Cancelled');
+  const refundedOrders = filterOrders(data, 'Refunded');
+
+  const handlePayClick = (order) => {
+    setSelectedOrder(order);
+    setOpenDialog(true);
+  };
+
+  const handlePaymentChoice = (choice) => {
+    setPaymentChoice(choice);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+  };
+
+  const getSelectedOrders = () => {
+    switch (selectedTab) {
+      case 0:
+        return orderedOrders;
+      case 1:
+        return paidOrders;
+      case 2:
+        return cancelledOrders;
+      case 3:
+        return refundedOrders;
+      default:
+        return [];
+    }
+  };
+
+  const rows = getSelectedOrders()?.map((order) =>
     createData(
-      order._id,
       order.table?.name,
       order.admin.firstName + ' ' + order.admin.lastName,
       new Date(order.createdAt).toLocaleString(),
       order.status,
-      'Total',
+      ccyFormat(invoiceTotal(order.discount, order.taxes, order.service, order.products)),
       'Edit',
-      'Pay'
+      <Button onClick={() => handlePayClick(order)}>Pay</Button>
     )
   );
 
@@ -72,46 +117,75 @@ export default function StickyHeadTable() {
     setPage(0);
   };
 
+  const handleChangeTab = (event, newValue) => {
+    setSelectedTab(newValue);
+    setPage(0);
+  };
+
   return (
-    <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-      <TableContainer sx={{ maxHeight: 440 }}>
-        <Table stickyHeader aria-label='sticky table'>
-          <TableHead>
-            <TableRow>
-              {columns.map((column) => (
-                <TableCell key={column.id} align={'left'} style={{ minWidth: column.minWidth }}>
-                  {column.label}
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {rows?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
-              return (
-                <TableRow hover role='checkbox' tabIndex={-1} key={row.code}>
-                  {columns.map((column) => {
-                    const value = row[column.id];
-                    return (
-                      <TableCell key={column.id} align={'left'}>
-                        {column.format && typeof value === 'number' ? column.format(value) : value}
-                      </TableCell>
-                    );
-                  })}
+    <Box>
+      <Tabs value={selectedTab} onChange={handleChangeTab} variant='fullWidth' indicatorColor='primary'>
+        <Tab label='Ordered' />
+        <Tab label='Paid' />
+        <Tab label='Cancelled' />
+        <Tab label='Refunded' />
+      </Tabs>
+      {isLoading && (
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+          <CircularProgress />
+        </div>
+      )}
+      {isError && <p>Error: {error.message}</p>}
+      {!isLoading && !isError && (
+        <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+          <TableContainer sx={{ maxHeight: 440 }}>
+            <Table stickyHeader aria-label='sticky table'>
+              <TableHead>
+                <TableRow>
+                  {columns.map((column) => (
+                    <TableCell key={column.id} align={'left'} style={{ minWidth: column.minWidth }}>
+                      {column.label}
+                    </TableCell>
+                  ))}
                 </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      <TablePagination
-        rowsPerPageOptions={[10, 25, 100]}
-        component='div'
-        count={rows?.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
+              </TableHead>
+              <TableBody>
+                {rows?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
+                  return (
+                    <TableRow hover role='checkbox' tabIndex={-1} key={row.code}>
+                      {columns.map((column) => {
+                        const value = row[column.id];
+                        return (
+                          <TableCell key={column.id} align={'left'}>
+                            {column.format && typeof value === 'number' ? column.format(value) : value}
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <TablePagination
+            rowsPerPageOptions={[10, 25, 100]}
+            component='div'
+            count={rows?.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
+        </Paper>
+      )}
+      <PaymentDialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        onSelectPayment={handlePaymentChoice}
+        onPrint={() => console.log('Print')}
+        onPayAndPrint={() => console.log('Pay & Print')}
+        orderId={selectedOrder?._id}
       />
-    </Paper>
+    </Box>
   );
 }
