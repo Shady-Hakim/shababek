@@ -1,55 +1,64 @@
-import React from 'react';
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Radio,
-  RadioGroup,
-  FormControlLabel,
-  Typography,
-} from '@mui/material';
+import React, { useRef, useState } from 'react';
+import { Dialog, DialogContent, DialogActions, Button } from '@mui/material';
+import { Payment, Print, Cancel } from '@mui/icons-material';
+import PrintableReceipt from './PrintableReceipt';
+import { useUpdateOrderMutation } from '../order.actions';
 
-const PaymentDialog = ({ open, onClose, onSelectPayment, onPay, onPrint, onPayAndPrint, orderId }) => {
-  const [paymentChoice, setPaymentChoice] = React.useState('');
+const PaymentDialog = ({ open, onClose, order, refetch }) => {
+  const receiptRef = useRef();
+  const [updateOrder, { isSuccess, isError }] = useUpdateOrderMutation();
+  const [openDialog, setOpenDialog] = useState(false);
 
-  const handlePaymentChange = (event) => {
-    setPaymentChoice(event.target.value);
-    onSelectPayment(event.target.value);
+  const onAction = async (action) => {
+    await updateOrder({ paymentType: 'Cash', status: action, orderId: order._id });
+    refetch();
+    setOpenDialog(true);
+    setTimeout(() => {
+      setOpenDialog(false);
+    }, 2000);
   };
 
-  const handlePayment = () => {
-    console.log(`Processing payment for order ${orderId}`);
-    onClose();
+  const handlePrint = () => {
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write('<html><head><title>Shababeek</title></head><body style="text-align: center">');
+
+    printWindow.document.write(receiptRef.current.innerHTML);
+
+    printWindow.document.write('</body></html>');
+    printWindow.document.close();
+
+    printWindow.print();
+    printWindow.onafterprint = () => printWindow.close();
   };
 
   return (
     <Dialog open={open} onClose={onClose}>
-      <DialogTitle>Payment Options</DialogTitle>
-      <DialogContent>
-        <Typography>Select payment method:</Typography>
-        <RadioGroup
-          aria-label='payment-method'
-          name='payment-method'
-          value={paymentChoice}
-          onChange={handlePaymentChange}>
-          <FormControlLabel value='Cash' control={<Radio />} label='Cash' />
-          <FormControlLabel value='Visa' control={<Radio />} label='Visa' />
-        </RadioGroup>
+      <DialogContent ref={receiptRef}>
+        <PrintableReceipt order={order} />
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button onClick={handlePayment} disabled={!paymentChoice}>
+        <Button onClick={() => onAction('Paid')} startIcon={<Payment />} variant='contained'>
           Pay
         </Button>
-        <Button onClick={onPrint} disabled={!paymentChoice}>
+        <Button onClick={handlePrint} startIcon={<Print />} variant='contained'>
           Print
         </Button>
-        <Button onClick={onPayAndPrint} disabled={!paymentChoice}>
-          Pay & Print
+        <Button onClick={() => onAction('Cancelled')} startIcon={<Payment />} variant='contained'>
+          Cancel
+        </Button>
+        <Button onClick={() => onAction('Refunded')} startIcon={<Payment />} variant='contained'>
+          Refund
+        </Button>
+        <Button onClick={onClose} startIcon={<Cancel />} variant='outlined'>
+          Close
         </Button>
       </DialogActions>
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+        <DialogContent>
+          {isError && <div style={{ color: 'red', marginTop: '8px' }}>Error updating order</div>}
+          {isSuccess && <div style={{ color: 'green', marginTop: '8px' }}>Order updated successfully</div>}
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 };

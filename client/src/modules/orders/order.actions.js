@@ -15,7 +15,18 @@ export const ordersApi = api.injectEndpoints({
         body,
       }),
     }),
+    updateOrder: builder.mutation({
+      query: (order) => {
+        const { orderId, ...body } = order;
+
+        return {
+          url: `/v1/orders/${orderId}?userType=admin`,
+          method: 'PATCH',
+          body,
+        };
+      },
+    }),
   }),
 });
 
-export const { useOrdersQuery, useAddOrderMutation } = ordersApi;
+export const { useOrdersQuery, useAddOrderMutation, useUpdateOrderMutation } = ordersApi;

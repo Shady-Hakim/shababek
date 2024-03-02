@@ -5,7 +5,6 @@ import { People, TableRestaurant } from '@mui/icons-material';
 import Receipt from './Receipt';
 import { useAddOrderMutation } from '../order.actions';
 import { clearCart } from '../../common/cart';
-import { useParams } from 'react-router-dom';
 
 const Order = ({ table }) => {
   const cartItems = useSelector((state) => state.cart.cartItems);

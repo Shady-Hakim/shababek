@@ -42,7 +42,7 @@ const columns = [
     label: 'Pay',
     minWidth: 100,
     align: 'right',
-    format: (value) => value.toFixed(2),
+    format: (value) => value.toLocaleString('en-US'),
   },
 ];
 
@@ -60,9 +60,8 @@ export default function StickyHeadTable() {
   const [selectedTab, setSelectedTab] = useState(0);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
-  const [paymentChoice, setPaymentChoice] = useState('');
 
-  const { data, isLoading, isError, error } = useOrdersQuery();
+  const { data, isLoading, isError, error, refetch } = useOrdersQuery();
   const orderedOrders = filterOrders(data, 'Ordered');
   const paidOrders = filterOrders(data, 'Paid');
   const cancelledOrders = filterOrders(data, 'Cancelled');
@@ -71,10 +70,6 @@ export default function StickyHeadTable() {
   const handlePayClick = (order) => {
     setSelectedOrder(order);
     setOpenDialog(true);
-  };
-
-  const handlePaymentChoice = (choice) => {
-    setPaymentChoice(choice);
   };
 
   const handleCloseDialog = () => {
@@ -104,7 +99,7 @@ export default function StickyHeadTable() {
       order.status,
       ccyFormat(invoiceTotal(order.discount, order.taxes, order.service, order.products)),
       'Edit',
-      <Button onClick={() => handlePayClick(order)}>Pay</Button>
+      <Button onClick={() => handlePayClick(order)}>Actions</Button>
     )
   );
 
@@ -178,14 +173,7 @@ export default function StickyHeadTable() {
           />
         </Paper>
       )}
-      <PaymentDialog
-        open={openDialog}
-        onClose={handleCloseDialog}
-        onSelectPayment={handlePaymentChoice}
-        onPrint={() => console.log('Print')}
-        onPayAndPrint={() => console.log('Pay & Print')}
-        orderId={selectedOrder?._id}
-      />
+      <PaymentDialog refetch={refetch} open={openDialog} onClose={handleCloseDialog} order={selectedOrder} />
     </Box>
   );
 }
