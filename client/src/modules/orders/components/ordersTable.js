@@ -17,6 +17,7 @@ import {
 import { useOrdersQuery } from '../order.actions';
 import { ccyFormat, invoiceTotal } from '../../common/functions';
 import PaymentDialog from './PaymentDialog';
+import OrderDetailsDialog from './OrderDetailsDialog';
 
 const columns = [
   {
@@ -38,16 +39,23 @@ const columns = [
     format: (value) => value.toLocaleString('en-US'),
   },
   {
-    id: 'pay',
-    label: 'Pay',
+    id: 'actions',
+    label: 'Actions',
+    minWidth: 100,
+    align: 'right',
+    format: (value) => value.toLocaleString('en-US'),
+  },
+  {
+    id: 'view',
+    label: 'View',
     minWidth: 100,
     align: 'right',
     format: (value) => value.toLocaleString('en-US'),
   },
 ];
 
-function createData(table, user, createdDate, statue, total, edit, pay) {
-  return { table, user, createdDate, statue, total, edit, pay };
+function createData(table, user, createdDate, statue, total, edit, actions, view) {
+  return { table, user, createdDate, statue, total, edit, actions, view };
 }
 
 const filterOrders = (orders, status) => {
@@ -60,6 +68,7 @@ export default function StickyHeadTable() {
   const [selectedTab, setSelectedTab] = useState(0);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
+  const [openOrderDetailsDialog, setOpenOrderDetailsDialog] = useState(false);
 
   const { data, isLoading, isError, error, refetch } = useOrdersQuery();
   const orderedOrders = filterOrders(data, 'Ordered');
@@ -67,13 +76,14 @@ export default function StickyHeadTable() {
   const cancelledOrders = filterOrders(data, 'Cancelled');
   const refundedOrders = filterOrders(data, 'Refunded');
 
-  const handlePayClick = (order) => {
+  const handleActionsClick = (order) => {
     setSelectedOrder(order);
     setOpenDialog(true);
   };
 
-  const handleCloseDialog = () => {
-    setOpenDialog(false);
+  const handleViewClick = (order) => {
+    setSelectedOrder(order);
+    setOpenOrderDetailsDialog(true);
   };
 
   const getSelectedOrders = () => {
@@ -99,7 +109,8 @@ export default function StickyHeadTable() {
       order.status,
       ccyFormat(invoiceTotal(order.discount, order.taxes, order.service, order.products)),
       'Edit',
-      <Button onClick={() => handlePayClick(order)}>Actions</Button>
+      <Button onClick={() => handleActionsClick(order)}>Actions</Button>,
+      <Button onClick={() => handleViewClick(order)}>View</Button>
     )
   );
 
@@ -173,7 +184,14 @@ export default function StickyHeadTable() {
           />
         </Paper>
       )}
-      <PaymentDialog refetch={refetch} open={openDialog} onClose={handleCloseDialog} order={selectedOrder} />
+      <PaymentDialog refetch={refetch} open={openDialog} onClose={() => setOpenDialog(false)} order={selectedOrder} />
+      {selectedOrder && (
+        <OrderDetailsDialog
+          open={openOrderDetailsDialog}
+          onClose={() => setOpenOrderDetailsDialog(false)}
+          order={selectedOrder}
+        />
+      )}
     </Box>
   );
 }
